@@ -1,0 +1,169 @@
+
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\usepackage[framed,numbered]{matlab-prettifier} 
+\usepackage[T1]{fontenc} 
+\lstset{
+  style = Matlab-pyglike,
+  basicstyle = \mlttfamily, 
+  mlshowsectionrules = true,
+  texcl=true,
+  literate={-}{-}1,
+  morekeywords={def,print,lambda,range},
+}
+
+
+%% Stolen from stackexchange
+% to make code look like spyder
+\newcommand*{\pyfontfamily}{\fontfamily{DejaVuSansMono-TLF}\selectfont}
+
+% These are close to the default font colors in Spyder
+\usepackage{color}
+\definecolor{pycommentcol}{rgb}{0.3,0.3,0.3}     % gray
+\definecolor{pystatecol}{rgb}{0,0,0.7}           % blue
+\definecolor{pystringcol}{rgb}{0,0.6,0}          % green
+\definecolor{pyinbuiltscol}{rgb}{0.55,0.15,0.55} % plum
+\definecolor{pyspecialcol}{rgb}{0.8,0.45,0.12}   % orange
+
+\usepackage{listings}
+\newcommand\pythonstyle{\lstset{
+    language=Python,
+    basicstyle=\pyfontfamily,
+    commentstyle=\color{pycommentcol}\itshape,
+    emph={self,cls,@classmethod,@property}, % Custom highlighting
+    emphstyle=\color{pyspecialcol}\itshape, % Custom highlighting style
+    morestring=[b]{"""},
+    stringstyle=\color{pystringcol},
+    keywordstyle=\color{pystatecol},        % statements
+    % remove any inbuilt functions from keywords
+    deletekeywords={print},
+    % Switch to predefined class that contain many, but not all,
+    % inbuilt functions and classes
+    classoffset=1,
+    % add any inbuilts, not statements
+    morekeywords={print,None,TypeError},
+    keywordstyle=\color{pyinbuiltscol},
+    frame=tb,                        
+    showstringspaces=false            
+}}
+
+\lstnewenvironment{python}[1][]
+{
+    \pythonstyle
+    \scriptsize
+    \lstset{#1}
+}
+{}
+
+
+
+\usepackage{tcolorbox}
+
+
+
+\usepackage[utf8]{inputenc}
+
+\usepackage[a4paper, top=4cm, bottom=2cm,left=2.5cm,right=2.5cm, headheight=3cm]{geometry}
+
+
+% paragraphs without indent
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{2ex}
+
+\usepackage{xcolor}
+
+
+\usepackage{hyperref}
+
+
+\usepackage{titleps}
+\renewpagestyle{plain}{%
+\sethead{}{}{}
+\setfoot[\thepage][][]{\thepage}{}{}
+}%
+\pagestyle{plain}
+
+\usepackage{fancyhdr}
+
+
+\newcommand{\matlab}{MATLAB }
+
+\begin{document}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.0pt}
+
+\thispagestyle{fancy}
+\fancyhf{}
+\lhead{Statistical learning with high dimensional data \\
+5MS084}
+
+\rhead{Umeå Universitet \\
+Inst. Mat. och Mat. Stat.\\
+AF}
+
+\
+
+{ \bf \center \large Course project: Sensitivity to data shortage and fine tuning}
+
+{\large Re-examination}
+
+\smallskip
+
+The purpose of this project is to train the ability to practically apply four of the models we encounter in the Statistical Learning course. The different types of models are to be trained, tuned and validated systematically. The dataset -- \textbf{CIFAR10} -- is one of the simplest and most classical datasets to train machine learning models on. The aim is therefore not to simply test the performance of the methods -- it will almost always be possible to get it very high quite easily -- but rather test how sensitive they are to 'data-starving' and errors in fine-tuning.  \newline
+
+
+\textbf{Procedure} You are free to choose an appropriate software to solve this task. $\texttt{Python}$ with $\texttt{sklearn}$ and $\texttt{pytorch}$ is recommended -- but you are also free to use e.g. $\texttt{R}$.
+
+Your work should be presented in a report of at most \textbf{ten} pages (11pt). It should contain
+\begin{itemize}
+    \item A short description of the data.
+    \item A description of what algorithms you have applied. You do not have to present any theoretical details, and the implementational details should be kept to a minimum. It should however be possible to reproduce the experiment you have done only based on your description in the text.
+    \item An adequate presentation of your results.
+    \item A discussion of the results, grounded in the theory presented in the course, and in the results you have presented.
+    \item The code you have used is to be submitted as supplementary material, in a .zip-file.
+\end{itemize}
+You may hand in an appendix to present details that are relevant, but not crucial for the understanding of the main paper.
+
+\textbf{Peer feedback} You will hand in two drafts of the report, to be peer reviewed by your coursemates. See instructions on Canvas.
+
+\textbf{Grading} The report will be graded using the rubric presented on the Canvas page. A pass is needed to pass the course, points will additionally be used to determine the grade on the entire course.
+
+\newpage
+\subsection*{Lab description}
+
+Your task is to train four models, of the following types:
+\begin{itemize}
+    \item Linear/quadratic discriminant analysis.
+    \item Support Vector Machine
+    \item Random Forest
+    \item Neural network
+\end{itemize}
+on the classic, well known \textbf{MNIST} dataset. The main goal will \textbf{not} be to train a model which performs good - on MNIST, this is in fact quite easy. Instead, the purpose of the experiment is to test
+\begin{itemize}
+    \item Which model perform better in situations with data scarcity?
+    \item Which models are most sensitive to tuning?
+\end{itemize}
+
+\paragraph{Data} MNIST can be downloaded per the instructions on its \href{https://www.cs.toronto.edu/~kriz/cifar.html}{\texttt{webpage}} or with torchvision \newline \texttt{torchvision.datasets.CIFAR10}. The pytorch version is already split into a training and a test set, sklearn will download all 50000+10000=60000 images into one dataset.
+
+\emph{Note:} The CIFAR10 dataset should be available through openml (and the download function \\\texttt{sklearn.datasets.fetch\_openml} in sklearn), but the openml webpage is at time of writing (\today) down.
+
+
+\paragraph{Models} As said, you should train four models, each of a different type. You are free to make any modelling choices that you want - for instance any preprocessing in LDA/QDA, which kernel should be used for the support vector machine, which splitting criterion/technique should be applied for the decision trees, and the architecture of the neural network. You do not need to motivate these choices, but make sure that you choose models that are not too slow or big to train. Importantly \textbf{describe} the choices that  make, to make your experiment reproducible.
+
+\paragraph{Setup} Select random subsets of the training dataset of at least three (significantly different) sizes, for instance $100$, $1000$ and $10000$. Train each model on each subset, as well as the whole dataset, and compare the performance on the test set. 
+
+\paragraph{Tuning} For each model, identify one or a few parameters that are relevant to tune, and use e.g. cross-validation to tune your model. Compare the performance of the tuned models with models where all parameters are chosen as the default. 
+
+\paragraph{A few things to think about} In order to arrive at solid results, you will need to think about how to set up your experiment. In what way have you controlled for the choices of the smaller datasets? Which ad-hoc choices are there that could influence the performance of the models? The way you have handled these aspects will influence your 'scientific soundness scores'. 
+
+When you discuss your results, try to give explainations to your results grounded in theory. Think about concepts we have covered in the course, such as overfitting. Be very clear when you speculate and when you can point to a theoretical fact. There may be that not many conclusions can be drawn from your results -- then be clear with that. Also, discuss potential improvement of your experimental setup. 
+
+Think about these aspects when you peer review other reports!
+
+
+
+
+\end{document}
