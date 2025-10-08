@@ -131,6 +131,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{matrix,arrows.meta}
+\usepackage{wrapfig}
 
 
 \begin{document}
@@ -482,7 +483,7 @@ To understand this, we can again use intuition from linear algebra: When recordi
 
 The solution to this problem is given by the following theorem:
 
-\begin{theorem}
+\begin{theorem} \label{th:svd}
    An $r$-dimensional subspace $\calU = \{U\rho+b, \rho \in \R^r\}$ minimizes the expected distance from the data vector $x$ to $\calU$ if and only if the orthogonal columns $U^i \in \R^p$ of $U$ are the orthogonal directions $\phi_0, \dots, \phi_{r-1}$ that maximizes the variance
    \begin{align} \label{eq:maxvar}
        \sum_{i \in [r]} \mathbb{V}(\sprod{\phi_i,x})
@@ -1030,7 +1031,7 @@ Classification with logistic regression, LDA and QDA are discussed in Chapter 4.
 \end{exercise}
 
 \begin{exercise}
-    The purpose of this exercise is to derive the formula \label{eq:mean}. We will for simplicity do the derivation for the discrete case for scalar $k$, but the argument is exactly the same as for the continuous case and multidimensional case
+    The purpose of this exercise is to derive the formula \ref{eq:mean}. We will for simplicity do the derivation for the discrete case for scalar $k$, but the argument is exactly the same as for the continuous case and multidimensional case
 
     \begin{enumerate}[(a)]
         \item Argue that
@@ -2260,10 +2261,12 @@ If $s=\abs{S}\leq n$, this is again a simple, 'low-dimensional' linear regressio
 \subsection{A better greedy method: Orthogonal Matching Pursuit}
 In Chapter $2$, we discussed a very simple \emph{greedy} method to solve the sparse regression problem: See which $1$-sparse support (i.e., which feature) can best explain the data on its own, keep that, and then iteratively add new features by checking which new subsets performs the best.
 
-This method works, but it is relatively expensive -- to find an $s$-sparse vector, we will during its course have to solve $p+(p-1)+\dots + (p-s+1) \sim ps$ linear regression problems. This can be improved a lot. We will here discuss a method that only requires $s$ linear regression problems to be solved: \emph{Orthogonal Matching Pursuit} (OMP).
+This method works, but it is relatively expensive -- to find an $s$-sparse vector, we will during its course have to solve $p+(p-1)+\dots + (p-s+1) \sim ps$ linear regression problems. This can be improved a lot. We will here discuss a method that only requires $s$ linear regression problems to be solved: \emph{Orthogonal Matching Pursuit} (OMP). It is needless to say that only needing to solve $s$ problems instead of $ps$ is a \emph{huge} improvement in the high-dimensional regime.
 
 
-OMP is presented in Algorithm \ref{alg:OMP}. The method iteratively builds estimates $S_0,S_1,S_2, \dots S_k$ of $\mathrm{supp}(\beta_*)$ and $\beta_k$ of $\beta_*$ (where $\mathrm{supp} \beta_k = S_k$. After initializing $S_0=\emptyset$, the idea is to determine next index to add to $S_k$ is determined as the index $\ell$ that \textbf{maximizes the correlation} between the \textbf{residual} $r_k=Y-X\beta_k$ ('the portion of output left to explain') and \textbf{feature} $\ell$. Assuming the features are all centered and normalized, this can be expressed mathematically as maximizing the scalar product $\abs{\sprod{r_k,X^\ell}}$, where $X^\ell$ is the $\ell$:th column of the data matrix $X$. Note that checking which one of these is largest is very cheap. One thereafter determines $\beta_{k+1}$ by solving the linear regression problem on the new restricted support. It is clear that if we perform $s$ iterations of $OMP$, only $s$ linear regressions need to be solved, which is \emph{much} less than $s\cdot p$, especially in high dimensions ($p\gg 1$). For pseudo-code, see 
+OMP is presented in Algorithm \ref{alg:OMP}. Just as forward selection, method iteratively builds estimates $S_0,S_1,S_2, \dots S_k$ of $\mathrm{supp}(\beta_*)$ and approximations $\beta_k$ of $\beta_*$ (where $\mathrm{supp} \beta_k = S_k$. After initializing $S_0=\emptyset$, the idea is to add to $S_k$ the index  $\ell$ that \textbf{maximizes the correlation} between the \textbf{residual} $r_k=Y-X\beta_k$ ('the portion of output left to explain') and \textbf{feature} $\ell$. Assuming the features are all centered and normalized, this can be expressed mathematically as maximizing the scalar product $\abs{\sprod{r_k,X^\ell}}$, where $X^\ell$ is the $\ell$:th column of the data matrix $X$. Note that checking for which $\ell$ the scalar product is largest is very cheap!
+
+One thereafter determines $\beta_{k+1}$ by solving the linear regression problem on the support approximand $S_{k+1}$. It is clear that if we perform $s$ iterations of $OMP$, only $s$ linear regressions need to be solved, which is \emph{much} less than $s\cdot p$, especially in high dimensions ($p\gg 1$). For pseudo-code, see \ref{alg:OMP}.
 
 
 \begin{algorithm}[tb]      
@@ -2287,9 +2290,9 @@ OMP is presented in Algorithm \ref{alg:OMP}. The method iteratively builds estim
 
 
 \paragraph{Analysis of OMP}
-As with any other greedy method, there is in general no guarantee that we will find the best sets of $s$ explaining features through OMP. Empirically, it often does quite well though. Can we theoretically explain this? Or put in another way, can we give conditions on the data matrix $X$ which guarantees that OMP works. This would also give useful information about when OMP is reasonable to apply.
+As with any other greedy method, there is in general no guarantee that we will find the best sets of $s$ explaining features through OMP. Empirically, it often does quite well though. Can we theoretically explain this? Or put in another way, can we give \emph{conditions} on the data matrix $X$ which \emph{guarantee} that OMP works? This would also give useful information about when OMP is reasonable to apply.
 
-The most well-known recovery guarantee for OMP is based on \emph{mutual coherehce.}
+The answer is that we can. The most fundamental and well-known recovery guarantee for OMP is based on \emph{mutual coherehce.}
 \begin{theorem} \label{th:OMP}
     Assume that the data matrix $X$ has normalized columns: $\norm{X^i}_2=1$, $i\in [p]$, and define the \emph{mutual coherence} parameter
     \begin{align*}
@@ -2297,7 +2300,7 @@ The most well-known recovery guarantee for OMP is based on \emph{mutual coherehc
     \end{align*}
     Also assume that there exists an $s$-sparse vector $\beta_*$ that explains the output, i.e. so that $Y=X\beta_*$. Then, if $$\mu < \frac{1}{2s-1},$$ OMP will output $\beta_*$ after $s$ steps. 
 \end{theorem}
-\paragraph{Intuition:} Remember that we add variables by checking which feature correlates highly with the residual. If all features are (empirically) weakly correlated, a feature not present in $\mathrm{supp}(\beta_*)$ will not be correlated to $r_0=Y$, and hence not chosen. When we calculate $\beta_1$, we then 'remove' the portion of $Y$ that can be explained by the feature $i_1$, and what is left $r_1$ should then be explainable with the remaning variables. The features not present in $\mathrm{supp}(\beta_*)$ will again give a small correlation value, and we again choose a correct variable, and so on and so forth.
+\paragraph{Intuition:} Remember that we add variables by checking which feature correlates highly with the residual. If all features are (empirically) weakly correlated, a feature not present in $\mathrm{supp}(\beta_*)$ will not be correlated to $r_0=Y$, and hence not chosen. When we calculate $\beta_1$, we then 'remove' the portion of $Y$ that can be explained by the feature $i_1$, and what is left $r_1$ should then be explainable with the remaning variables. The features not present in $\mathrm{supp}(\beta_*)$ will again give a small correlation value, and we again choose a correct variable, and so on and so forth. In each of the $s$ first steps, we hence pick a new feature, and this feature is one that is present in the ground truth support, so we will be done after $s$ steps.
 
 
 To give a formal proof of Theorem \ref{th:OMP}, we need the following lemma.
@@ -2345,7 +2348,7 @@ The next approximation $\beta_{k+1}$ is given by the solution to \eqref{eq:omppr
 \end{align*}
 This is just another way to write that $\sprod{X^i,r_{k+1}}=0$ for all $i \in S_{k+1}$, i.e. (iii). It is now only left to note that $r_k = X\beta - X\beta_{k+1} = X(\beta-\beta_{k+1})$, and $\gamma_{k+1}=\beta-\beta_{k+1}$ is supported on $S$.
 
-If we now evaluate what we have proven for $k=s$, we see $S_s$ is a set contained in $S$ with $s$ indices, i.e. is equal to $S$. Since $\beta_*$ clearly is a solution to 
+If we now evaluate what we have proven for $k=s$, we see that $S_s$ is a set contained in $S$ with $s$ indices, i.e. is equal to $S$. Since $\beta_*$ clearly is a solution to 
 \begin{align*}
     \min_{\supp \beta \sse S} \norm{X_{S}\beta - Y}_2^2,
 \end{align*}
@@ -2388,7 +2391,7 @@ for some constant $C$ (dependent on the exact distribution of the $x(i)$, and th
 \end{align*}
 In short, when the features are uncorrelated and bounded (in the sense that $\mathbb{E}(x(i)^2x(j)^2)\leq K$), the mutual coherence decays as $\frac{1}{\sqrt{n}}$. This gets smaller than $\frac{1}{2s-1}$ when $n\geq (2s-1)^2$. Thus, we need $(2s-1)^2$ observations to guarantee that we successfully infer an $s$-sparse $\beta_*$! 
 
-Is this a 'good' amount of observations? There is at least reason to hope for something better -- we after all want to solve an $s$-dimensional linear regression in the end, that should only need about $s$ observations. In the next section, we will learn about such a method!
+Is this a 'good' amount of observations? There is at least reason to hope for something better:  after all, we want to solve an $s$-dimensional linear regression in the end, that should only need about $s$ observations. In the next section, we will learn about such a method!
 
 \paragraph{Remark} If we assume that all features are independent standard Gaussian variables, one can actually prove that OMP will be successful with high probability already with around $s\log(p)$ observations. To present the proof of this result, which does not rely on mutual coherence, goes beyond the scope of this course. The interested reader is directed to \cite{tropp2007signal}. More further reading about greedy algorithms and mutual coherence can be found in \cite[Ch.3,5]{FouRau2013}.
 
@@ -2398,12 +2401,19 @@ The quadratic behaviour of the number of measurements to achieve a low coherence
 \end{align*}
 See also the exercises below.
 
-\subsubsection{LASSO and Basis pursuit}
-In Chapter $2$, we got to know a different approach to high-dimensional linear regression: \emph{regularization}. More specifically, we defined \emph{ridge regression} -- by penalizing the $\ell_2$-norm, we could reduced the variance. We also argued mathematically that it will be able to return a ground truth if the rows of the data matrix $X$, the \emph{measurements}, lie in a low-dimensional subspace, but else not.
+\subsection{A better regularization: LASSO and Basis pursuit}
+We have already to know a different approach to high-dimensional linear regression: \emph{regularization}. More specifically, we defined \emph{ridge regression} -- by penalizing the $\ell_2$-norm, we could reduced the variance of linear regression. We also argued mathematically that it will be able to return a ground truth if the rows of the data matrix $X$, the \emph{measurements}, lie in a low-dimensional subspace, but else not.
 
-Can ridge regression be used for sparse recover? In principle yes, but it will not work better than for any other ground truth. In particular, if the measurements (rows of $X$) are normally distributed, ridge regression will typically give us back dense vectors (because of the geometry of the kernel of random matrices). 
+Can ridge regression be used for sparse recover?y In principle yes, but it will not work better than for any other ground truth. In particular, if the measurements (rows of $X$) are normally distributed, ridge regression will typically give us back dense (=non-sparse) vectors (because of the geometry of the kernel of random matrices). 
 
-At first glance somewhat surprisingly, we can however regularize for sparsity by simply changing the regularization norm! This is the idea of\emph{LASSO} (least absolute shrinkage and selection operator), which amounts to regularizing a linear regression with an $\ell_1$-term:
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{graphics/l1sol.png}
+    \caption{$\ell_1$-regularization and sparsity. The ground truth vector to the left has been 'measured' with a random Gaussian matrix $X$, end then been tried to be recovered with LASSO (middle) and ridge regression (right). The ridge solution is dense and not very close to the ground truth, but the LASSO-solution is essentially equal to the ground trutn.}
+    \label{fig:l1sol}
+\end{figure}
+
+At first glance somewhat surprisingly, we can however regularize for sparsity by simply changing the regularization norm! This is the idea of the \emph{LASSO} (least absolute shrinkage and selection operator), which amounts to regularizing a linear regression with an $\ell_1$-term:
 \begin{align} \label{eq:lasso}
     \min_{\beta} \norm{X\beta-y}_2^2 + \lambda \norm{\beta}_1
 \end{align}
@@ -2411,7 +2421,7 @@ The $\ell_1$-norm ('Manhattan norm') is the sum of the absolute norm of the entr
 \begin{align*}
     \norm{\beta}_1 = \sum_{k \in [p]} \abs{\beta_k}.
 \end{align*}
-That this works is at first very non-intuitive, but it does work. The solutions of the LASSO are \emph{always} (at most $n$-)sparse (see e.g. \cite[Th.6]{UnserStructure}, or below for a more intuitive argument) and is able to exactly recover an $s$-sparse $\beta_*$ from about $s\log(n)$ measurements (for uncorrelated, centered and bounded features -- we sketch a proof of this later). Ridge regression does not have these properties!
+That this works is at first very non-intuitive, but it does work. The solutions of the LASSO are \emph{always} (at most $n$-)sparse (see e.g. \cite[Th.6]{UnserStructure}, or below for a more intuitive argument) and is able to exactly recover an $s$-sparse $\beta_*$ from about $s\log(n)$ measurements (for uncorrelated, centered and bounded features -- we sketch a proof of this later). Ridge regression does not have these properties! See also Figure \ref{fig:l1sol}
 
 There are two things to understand here: 
 \begin{itemize}
@@ -2421,11 +2431,11 @@ There are two things to understand here:
 
 \subsubsection{LASSO as a Bayesian method} The knowledge that the ground truth vector $\beta_*$ is sparse can be understood as a \emph{prior} -- a sparse $\beta$ is more likely than a non-sparse one. We can use this intuition to arrive at the LASSO through a \emph{Bayesian approach}.
 
-The idea of this approach in general to choose the \emph{most probable} value for $\beta$ conditional on the observations $Y$. That is, we use a maximum likelihood approach:
+The idea of Bayesian methods in general is to first choose a \emph{prior} on the \emph{regression weights} $\beta$, and then choose the \emph{most probable} value for $\beta$ conditional on the observations $Y$. That is, we use a maximum likelihood approach:
 \begin{align*}
     \max_{b} \mathbb{P}(\beta = b \, \vert \,Y=y)
 \end{align*}
-To arrive at an expression for $\mathbb{P}(\beta \, \vert \, Y)$, we imagine that the \emph{parameters} $\beta$ follow some distributions $\beta$ \emph{a priori}, i.e. before we make any observations (we \emph{impose a prior}), and that the labels $Y$ follow a certain distribution given $\beta$. To arrive at the LASSO, we impose an \emph{exponential prior} on $\beta$, and assume that the labels have been inflicted with Gaussian noise:
+To arrive at the LASSO, we impose an \emph{exponential prior} on $\beta$, and assume that the labels have been inflicted with Gaussian noise:
 \begin{align}
     &\beta_i \text{ i.i.d exponential, i.e. } \mathbb{P}(\beta = b) = \Pi_{i\in [p]}e^{-\mu\abs{b_i}} \\
     &\mathbb{P}(Y=y\, \vert \, \beta=b) \sim \exp(-\norm{Xb-y}^2_2/2\sigma^2).
@@ -2461,7 +2471,7 @@ which is just another way of writing the LASSO problem.
     The only thing left to give a general proof is to show that in any case, all solutions of \eqref{eq:lasso} have the same $\ell_1$-norm. This is possible, but it requires quite involved tools from the theory of convex optimization - we skip this.
 \end{proof}
 
-\paragraph{Remark} The lemma shows that we can solve \eqref{eq:constr} instead of the LASSO and obtain the same solutions -- for instance if an algorithm for either of the problems works particularly well for any of the problem. As the proof shows, there is no way to a priori tell which $s$ corresponds to which $\lambda$. Since in the end both $\lambda$ and $s$ needs to be tuned (chosen via validation), this poses little problems from both the theoretical and practical view.
+\paragraph{Remark} The lemma shows that we can solve \eqref{eq:constr} instead of the LASSO and obtain the same solutions. If our favorite algorithm works better for one of them, we should hence use that  As the proof shows, there is however no way to a priori tell which $s$ corresponds to which $\lambda$. Since in the end both $\lambda$ and $s$ needs to be tuned, this poses little problems from both the theoretical and practical view.
 
 \smallskip 
 The main importance of the  lemma is that we might as well reason about the solutions of \eqref{eq:constr}. And here, we can use geometrical intuition! Let us draw a sketch in two dimensions -- see Figure \ref{fig:l1l2}. Here, we are optimizing over the $\ell_1$-ball, and the function that we are optimizing have level sets that are lines. Those lines will almost always hit the $\ell_1$-ball in one of the vertices. The vertices are exactly the sparse vectors! Compare this to the $\ell_2$-constrained linear regression - the pendant for ridge regression -- here, the lines can hit the circle anywhere.
@@ -2479,7 +2489,7 @@ There are ways to formalize this argument and also carry it out in any dimension
 
 \begin{theorem}
     Let $\beta_\lambda$ denote the solution of \eqref{eq:lasso}. Then
-    \begin{enumerate}
+    \begin{enumerate}[(i)]
         \item Assume that the following problem has a unique solution $\beta_0$
         \begin{align}
             \min \norm{\beta}_1 \text{ subject to } X\beta = Y. \label{eq:BP}
@@ -2527,7 +2537,7 @@ There are ways to formalize this argument and also carry it out in any dimension
 
 The problem \ref{eq:BP} is called \emph{Basis Pursuit}. Notice the similar relation of the Basis Pursuit to the LASSO as minimal $\ell_2$-norm linear regression to ridge regression.
 
-When does Basis Pursuit recover a $\beta_*$? In the following, we will prove that the following \emph{restricted isometry property} (RIP) is sufficient
+When does Basis Pursuit recover a $\beta_*$? In the following, we will prove that the following \emph{restricted isometry property} (RIP) is sufficient.
 \begin{defi}
     The largest $\delta>0$ so that
     \begin{align*}
@@ -2535,8 +2545,27 @@ When does Basis Pursuit recover a $\beta_*$? In the following, we will prove tha
     \end{align*}
     for all $s$-sparse $\beta$ is called the $s$-Restricted isometry constant of $X$, denoted $\delta_s$. 
 \end{defi}
-If $\delta_s<1$, we say that $X$ satisfies the $s$-RIP.
+If $\delta_s<1$, we say that $X$ satisfies the $s$-RIP. We will get back to which matrices fulfill the RIP-property.
 
+Why should the RIP imply that LASSO/Basis Pursuit sparse vectors? To see this, let us decipher the condition: It says that $X$ approximately preserves the norm of all $s$-sparse vectors:
+\begin{align*}
+    \norm{X\beta}_2 \approx \norm{\beta}_2
+\end{align*}
+This means that if $X$ has the $\delta_{2s}$-RIP, we will have $\norm{X\beta-X\gamma}_2\approx \norm{\beta-\gamma}_2$ for all $s$-sparse vectors. Restricted to them, $X$ hence almost acts as an isometry. In particular, $\norm{X\beta-Y}_2 = \norm{X\beta-X\beta_*}_2 = \norm{\beta-\beta_*}_2$. Thus - and now we're getting \emph{really} handwavy -- the LASSO problem when restricted to $s$-sparse vectors almost turns into the problem
+\begin{align} \label{eq:prox}
+    \min_\beta \norm{\beta-\beta_*}_2^2 + \lambda \norm{\beta}_1,
+\end{align}
+which by the above in the Basis Pursuit limit turns into
+\begin{align*}
+    \min_\beta \norm{\beta}_1 \text{ subject to } \beta=\beta^*,
+\end{align*}
+which trivially is solved by $\beta^*$. We will need to work more for a valid mathematical argument. See also the exercises.
+
+Now, let us prove a formal theorem instead.
+\begin{theorem}
+   Suppose that $X$ fulfills the restricted isometry property $\delta_{2s}<\tfrac{1}{3}$. Then, if there exists an $s$-sparse $\beta_*$ so that $X\beta_*=Y$, $\beta_*$ is the unique solution of \eqref{eq:BP}.
+\end{theorem}
+To give a proof of this result, we need the following technical lemma:
 Let us prove a simple lemma.
 \begin{lemma}
    % (i) If $\delta_s<1$, all submatrices $X_S$ formed by selecting at most $s$ columns of $X$ will be injective.
@@ -2554,7 +2583,7 @@ Let us prove a simple lemma.
     %which is a contradiction.
 
     %To prove (ii), 
-    First note that it is enough to prove the assertion for the case that $\norm{\beta}_2=\norm{\gamma}_2=1$ -- the more general case follows via scaling. Now consider the following \emph{polarization identity}
+    First note that it is enough to prove the assertion for the case that $\norm{\beta}_2=\norm{\gamma}_2=1$ -- the more general case follows via scaling. Now consider the \emph{polarization identity}
     \begin{align*}
         \sprod{X\beta,X\gamma} = \frac{1}{4}\left( \norm{X(\beta+\gamma)}_2^2 - \norm{X(\beta-\gamma)}_2^2\right)
     \end{align*}
@@ -2569,9 +2598,7 @@ Let us prove a simple lemma.
 \end{proof}
 We can now prove that the RIP implies that Basis pursuit recovers $s$-sparse coefficient vectors.
 
-\begin{theorem}
-   Suppose that $X$ fulfills the restricted isometry property $\delta_{2s}<\tfrac{1}{3}$. Then, if there exists an $s$-sparse $\beta_*$ so that $X\beta_*=Y$, $\beta_*$ is the unique solution of \eqref{eq:BP}.
-\end{theorem}
+
 \begin{proof}
    We will prove that if $X$ has the RIP, it has the following \emph{null space property} (NSP): For all $\gamma \in \ker X$ and $S$-sparse support, we have $\norm{\gamma_S}_1<\norm{(\gamma_{S^c})}_1$, where $S^c$ is the complement of $S$. That implies the statement, since if $\beta$ is another vector with $X\beta = Y$, $\beta-\beta_*$ is in $\ker X$. Consequently, with $S=\supp \beta_*$
    \begin{align*}
@@ -2618,29 +2645,29 @@ We can now prove that the RIP implies that Basis pursuit recovers $s$-sparse coe
 
 
 \subsubsection{Matrices with the RIP}
-Now we know that the RIP implies that Basis Pursuit (and to some extent as a consequence, the LASSO) will be able to recover any $s$-sparse ground truth $\beta_*$. But what $X$ has the RIP?
+Now we know that the RIP implies that Basis Pursuit (and to some extent as a consequence, the LASSO) will be able to recover any $s$-sparse ground truth $\beta_*$. But what $X$ have the RIP?
 
-First, one can use something called the \emph{Gershgorin circle theorem} to show that if $X$ has normalised columns and a mutual coherence $\mu < \tfrac{\delta}{s-1}$, all matrices of the form $X_S^*X_S$  have eigenvalues between $(1-\delta)$ and $(1+\delta)$, which is equivalent to the RIP. As we already discussed though, to have a mutual coherence of that type, we need $n\gtrsim s^2$ measurements. This is known has the \emph{square-root bottleneck}: using mutual coherence, a matrix with $n$ rows can only be shown to be able to recover $\sqrt{n}$-sparse $\beta_*$
+First, one can use something called the \emph{Gershgorin circle theorem} to show that if $X$ has normalised columns and a mutual coherence $\mu < \tfrac{\delta}{s-1}$, all matrices of the form $X_S^*X_S$  have eigenvalues between $(1-\delta)$ and $(1+\delta)$, which is equivalent to the RIP. As we already discussed though, to have a mutual coherence of that small magnitude, we need $n\gtrsim s^2$ measurements. This 'resistance to mutual-coherence-based arguments' to prove a RIP for matries with less than $s^2$ measurements is colloquially referred to as the \emph{square-root bottleneck}: using mutual coherence, a matrix with $n$ rows can only be shown to be able to recover $\sqrt{n}$-sparse $\beta_*$
 
-It has been proven to be extremely hard to design deterministic matrices that break the squareroot bottleneck. Using extremely complicated combinatoric arguments, \cite{bourgain2011explicit} were the first authors to do so. As late as 2022, a subset of the authors published an improved paper \cite{ford2022explicit} using recent developments in combinatorics. But even this updated version only manages to get an $s$-RIP using $n\sim s^{\sfrac{2}{(1+\epsilon)}}$, with $\epsilon=1.63\cdot 10^{-7}$.
+It has been proven to be extremely hard to design \emph{deterministic} matrices that break the square-root bottleneck. Using extremely complicated combinatoric arguments, \cite{bourgain2011explicit} were the first authors to do so. As late as 2022, a subset of the authors published an improved paper \cite{ford2022explicit} using recent developments in combinatorics. But even this updated version only manages to get an $s$-RIP using $n\sim s^{\sfrac{2}{(1+\epsilon)}}$, measurements with $\epsilon=1.63\cdot 10^{-7}$.
 
 However, using \emph{random matrices}, one can do \emph{a lot} better. For many different constructions, it turns out that only 
 \begin{align*}
     n \gtrsim s\log(p)
 \end{align*}
-is necessary to get the $(2)s$-RIP. Essentially, we need to assume the following about the distribution of $X$:
+is necessary to get the $(2)s$-RIP. Many constructions use the following about the distribution of $X$:
 \begin{itemize}
-    \item The rows of the matrix are independently drawn -- this makes sense from a statistical point of view, it means that our data vectors $x_i$ are drawn independently.
-    \item The rows of $X$ are bounded -- $\norm{x}$ is bounded by some constant almost surely, or it at least decays as a Gaussian (one speaks of \emph{sub-Gaussian} distributions).
+    \item The rows of the matrix are \emph{independently} drawn. 
+    \item The rows of $X$ are bounded -- $\norm{x}$ is bounded by some constant almost surely, or it at least decays as a Gaussian (one speaks of \emph{sub-Gaussian} distributions). 
     \item The features are normalized and uncorrelated -- that is, $\mathbb{E}(x(k)x(j))=\delta_{kj}$.
 \end{itemize}
-Under the above assumptions, the matrix $\tfrac{1}{\sqrt{n}}X$ (the factor is to make sure that the columns of the matrix are close to one with high probability) has the $s$ RIP with high probability for $n \geq C s\log(p)$.
+The first one of these assumptions makes a lot of sense from a statistical point of view --  it just means that our data vectors $x_i$ are drawn independently, which is the standard assumption in all machine learning. The latter two are however more questionable -- let us get back to that.
 
-Let us sketch a proof in the simplest of cases, namely that the features are i.i.d. $\mathcal{N}(0,1)$-distributed. That is, all entries in $X$ are i.i.d. Gaussian -- one speaks of a \emph{Gaussian matrix}. We will hide quite many painfully technical details, but we will see all important ideas, that can be generalized to other matrices. The details can be found in \cite[Ch. 9.1]{foucart2011hard}.
+The claim is now the matrix $\tfrac{1}{\sqrt{n}}X$ (the factor is to make sure that the columns of the matrix are close to one with high probability) has the $s$-RIP with high probability for $n \geq C s\log(p)$, where $C$ is some numerical constant. Let us sketch a proof in the simplest of cases, namely that the features are i.i.d. $\mathcal{N}(0,1)$-distributed. That is, all entries in $X$ are i.i.d. Gaussian -- one speaks of a \emph{Gaussian matrix}. We will hide quite many painfully technical details, but we will see all important ideas, that can be generalized to other matrices. The details can be found in \cite[Ch. 9.1]{foucart2011hard}.
 
 \paragraph{Step 1: Concentration of a single vector} Note that what we want to prove that $\norm{X\beta}_2^2 \approx \norm{\beta}_2^2$ for all $s$-sparse $\beta$. In fact, it is enough to show that only for sparse vectors with norm at most one, since other vectors can be dealt with with scaling. Let us call the latter set $\calS$.
 
-Now let's start to prove that we have such an approximate equality for each fixed $\beta\in \calS$. First, notice that $\tfrac{1}{\sqrt{n}} X\beta = \sum_{i} \beta_i X^i$ is a sum of independent Gaussians, and hence a Gaussian itself. Its coherence matrix has entries
+Now let's start by showing that we have such an approximate equality for \emph{each fixed} $\beta\in \calS$. Notice that  $\tfrac{1}{\sqrt{n}} X\beta = \sum_{i} \beta_i X^i$ is a sum of independent Gaussians, and hence a Gaussian itself. Its coherence matrix has entries
 \begin{align*}
     \mathbb{E}((X\beta(X\beta)^*)_{ij}) = \sum_{i,j,k,\ell} \mathbb{E}(x_i(k) \beta(k) x_j(\ell) \beta(\ell)) =  \sum_{i,j,k\ell} \delta_{ij}\delta_{k\ell} \beta(k) \beta(\ell) = \norm{\beta}_2^2 \delta_{ij}.
 \end{align*}
@@ -2682,15 +2709,17 @@ which is the claim.
 
 
 
-\subsubsection{Is the RIP a realistic assumption? Necessary?} We have seen that in order for the RIP to hold, we need to assume that the features are uncorrelated. This is to some extent also necessary -- if there are two features that are perfectly correlated, $x(k)=x(j)$, we will have for $\beta$ with $\beta(k)=\beta(j)= \tfrac{1}{\sqrt{2}}$ and all other coefficients zero
+\subsubsection{Is the RIP a realistic assumption? Necessary?} Now let us get back to our set of assumptions. Are they reasonable? The boundedness assumption is in some situations problematic -- distributions in real life can have heavy tails -- but is still quite 'cheap' to assume. The correlation assumption is however very naive to make -- in real datasets, there are often features that are highly correlatied.
+
+Sadly, the decorrelation assumption is not only sufficient, but also some extent also necessary -- if there are two features that are perfectly correlated, $x(k)=x(j)$, we will have for $\beta$ with $\beta(k)=\beta(j)= \tfrac{1}{\sqrt{2}}$ and all other coefficients zero
 \begin{align*}
     \norm{X\beta}_2^2 = \sum_{i \in [n]} ( \frac{x_i(k)+x_i(k)}{2})^2  = 2 \sum_{i\in [n]}\abs{x_i(k)}^2 = 2 \norm{X^k}^2.
 \end{align*}
 In order for the RIP to hold, that $k$:th column of $X$ needs to be normalized. $\beta$ is hence a $2$-sparse vector with norm $1$ and $\norm{X\beta}_2^2=2\norm{\beta}_2^2$-- we have no RIP.
 
-Now, are features always uncorrelated in real datasets? Absolutely not. Hence, in practice, many matrices do not have the RIP. Does that mean that the LASSO and Basis pursuit is not applicable in practice? Yes and no.
+We therefore have to, sadly, conclude that  in practice, many matrices do not have the RIP. Does that mean that the LASSO and Basis pursuit is not applicable in practice? Yes and no.
 \begin{itemize}
-    \item If our main concern is to find the sparse coefficient vector $\beta_*$, we can say that we will almost certainly fail. Or in other words, we have to be very careful to draw conclusions of which features are important simply by looking at the LASSO estimate $\beta$. There may for instance be important features that are not chosen simply because LASSO chooses another, correlated feature instead.
+    \item If our main concern is to find the sparse coefficient vector $\beta_*$, we can say that we will almost certainly fail if the features are correlated. Or in other words, we have to be very careful to draw conclusions of which features are important simply by looking at the LASSO estimate $\beta$. There may for instance be important features that are not chosen simply because LASSO chooses another, correlated feature instead.
     \item If we however are only concerned with building a good predictor, this should not concern us too much. The results above are all about the recovery of the correct $\beta$, and say very little about the test error. Just as for ridge regression, an incorrect $\beta$ can still give very good test loss for certain data distributions! 
 \end{itemize}
 
@@ -2808,6 +2837,24 @@ Also consider these questions (some of which are from \cite{foucart2011hard}):
         \item Formulate an adapted form of the LASSO for estimating $\beta$.
         \item Suppose that $X$ is a Gaussian matrix. How many rows will it need for your new version of LASSO to succeed? Justify your answer.
     \end{itemize}
+\end{exercise}
+
+\begin{exercise}
+
+    Let $\varsigma_\lambda: \R^p \to \R^p$ denote the \emph{soft thresholding operator}:
+  
+    \begin{picture}(300,100)
+         \put(50,50){$
+        \varsigma_\lambda(\gamma)_i = \begin{cases}
+            x_i-\lambda &\text{ if } x_i > \lambda \\
+            0 &\text{ if } \abs{x_i}\leq\lambda \\
+            x_i + \lambda &\text{ if } x_i<-\lambda
+        \end{cases} $}
+        \put(250,10){\includegraphics[width=0.25\textwidth]{graphics/soft_threshold.png}}
+    \end{picture}
+
+    Show that the problem \eqref{eq:prox} is solved by $\varsigma_\lambda(\beta_*)$. Argue that this implies that the solution of \eqref{eq:prox} will be very (i) close to the ground truth (ii) sparse if the ground truth is. 
+
 \end{exercise}
 
 
@@ -2982,6 +3029,8 @@ This property is nice since it makes the \emph{dendrograms} of the hierarchies m
     \label{fig:dendro}
 \end{figure}
 
+
+
 \subsection{Recommended further reading and exercises}
 Unsupervised learning is treated in Chapter 12 of Introduction to statistical learning - clustering is more specifically treated in section 12.4. Recommended exercises are 12.6.2 and 12.6.4. Also consider the following exercise:
 
@@ -3020,7 +3069,7 @@ We will present it here in the context of binary classification, which is the cl
         In short, the error is the test-error of the model $h$ trained on the sample $\overline{x}$ using $\calA$ and the test examples are distributed according to $\mathbb{P}$. If the concept and probability distribution is clear, we will also speak of the \emph{error of $h$}. 
     \end{itemize}
 \end{defi}
-    Let us discuss these concepts in the case of training linear classifier.
+\paragraph{Example: Linear classifiers}    Let us discuss these concepts in the case of training linear classifier.
 
     The set $X$ is here $\R^n$. The hypothesis class $H$ is the set of all functions of the form
     \begin{align*}
@@ -3031,12 +3080,12 @@ We will present it here in the context of binary classification, which is the cl
     \end{align*}
     where $\alpha\in \R^p$.
 
-    We know a prominent model for learning linear classifiers: support vector machines. Training an SVM is an algorithm in the sense we have given above -- given any samples, we can apply it, get a hyperplane, and from that construct a decision function. Is the algorithm consistent? The classical SVM is. To train that, we optimize the margin among all hyperplanes that separate the classes. 'The hyperplane separates the classes' exactly means that all training examples are correctly classified by the decision function. Hence, the classical SVM is consistent.
+    We know a prominent model for learning linear classifiers: support vector machines. Training an SVM is an algorithm in the sense we have given above -- given any samples, we can apply it, get a hyperplane, and from that construct a decision function. Is the algorithm consistent? The classical (Hard-margin) SVM is! To train a hardmargin SVM, we optimize the margin among all hyperplanes that separate the classes. 'The hyperplane separates the classes' exactly means that all training examples are correctly classified by the decision function. Hence, the classical SVM is consistent.
 
     However, if we apply the soft margin SVM, it may very well be that be best hyperplane is not actually separating the data. Hence, the soft margin SVM is \emph{not} consistent.
 
    
-
+\
     
 
 
@@ -3050,14 +3099,14 @@ Now let us come back to the concept of learnability. A class being PAC learnable
         \end{align*}
         where $\overline{x}$ is formed by drawing $m(\delta,\epsilon)$ samples from $X$ according to $\mathbb{P}$. 
 
-        If $\calA$ is a learning algorithm for $C$ with respect to any $\mathbb{P}$ with sample size $m(\epsilon,\delta)$, we call it a \emph{learning algorithm for $C$ with respect to any $\mathbb{P}$ $m(\epsilon,\delta)$.}
+        If $\calA$ is a learning algorithm for $C$ with respect to any $\mathbb{P}$ with sample size $m(\epsilon,\delta)$, we call it a \emph{learning algorithm for $C$ with sample size $m(\epsilon,\delta)$.}
         \item $C$ is \emph{PAC-learnable} with sample size $m(\epsilon,\delta)$ if there exists a $H$ and a learning algorithm $\calA : \calS_C\to H$ with sample size $m(\epsilon,\delta)$. 
     \end{itemize}
 \end{defi}
 
 That was a lot. We will in the following get to know the definition better by considering three concrete examples.
 
-\subsection{Example 1: SVM for a two-point set}
+\subsection{Example 1: SVM for a three-point set}
 Let us begin by considering applying SVM for learning a fixed linear classifier $f_*$ as shown in Figure \ref{fig:gt_svm}. Let us consider a deliberately non-practical but illustrative case of $\mathbb{P}$ being the uniform distribution on three points show in the same figure.
 
 \begin{figure} 
@@ -3073,11 +3122,11 @@ Let us begin by considering applying SVM for learning a fixed linear classifier 
     \label{fig:errors_svm}
 \end{figure}
 
-Since multiple samples with the same labels will not affect the SVM, there are now only $7$ different types of samples that can be drawn. For each one of these, we can determine the maximum margin hyperplane by inspection. For each one of these, we can then easily determine the error $e_{\calA,f_*,\mathbb{P}}(\overline{x})$. See Figure \ref{fig:errors_svm}. Note that the algorithm in none of the cases gives back the ground truth, but it does still have a zero error incertain cases.
+Since repeated samples with the same labels will not affect the SVM, there are now only $7$ different draws of the sample $\overline{x}$ that  drawn. For each one of these, we can determine the maximum margin hyperplane by inspection. For each one of these, we can then easily determine the error $e_{\calA,f_*,\mathbb{P}}(\overline{x})$. See Figure \ref{fig:errors_svm}. Note that the algorithm in none of the cases gives back the ground truth, but it does still have a zero error incertain cases.
 
 Now, what can we say about the probability $\mathbb{P}(e_{\mathcal{A},f_*,\mathbb{P}}(\overline{x}) > \varepsilon)$? It heavily depends on the number of points drawn in the sample. If we draw two points, the three cases cases on the top of Figure \ref{fig:errors_svm} have probability $1/9$, the middle row cases have probabilities $2/9$ equiprobable. Since only one case will give us an error smaller than $1/3$, we will for any $\epsilon<\frac{1}{3}$, we will have $ \mathbb{P}( e_{\calA,f_*,\mathbb{P}}(\overline{x}) >\epsilon)= \tfrac{2}{9}$. If we however draw many points, we will will overwhelmingly big probability be in the case in the bottom row of Figure \ref{fig:errors_svm}: we can argue that if we draw $m$ points, the probability that we are not in that case is smaller than $3\cdot (2/3)^m$ (the probability that a certain dot is not drawn $m$ times is $(2/3)^m$, and there are three points that can be excluded). Hence, for any $\delta>0$
 \begin{align*}
-    \mathbb{P}( e_{\calA,f_*,\mathbb{P}}(\overline{x}) >\epsilon)= 3\cdot (2/3)^m,
+    \mathbb{P}( e_{\calA,f_*,\mathbb{P}}(\overline{x}) >\epsilon)\leq 3\cdot (2/3)^m,
 \end{align*}
 which is smaller than $\delta$ if $m \geq m \geq \log(2/3)^{-1}*\log(\delta/3)= \log(3/2)^{-1}\log(3/\delta)$.
 
@@ -3132,9 +3181,9 @@ Now let us consider a quite general example -- any concept class of finite size,
         \end{align*}
         $h$ will be inconsistent with $f_*$ on a sample $\overline{x}$ unless all $x_i$ are such that $f(x_i)=h(x_i)$. The probability that $f(x_i)=h(x_i)$ is less than $1-\epsilon$, so the the probability that all $f(x_i)=h(x_i)$ is less than $(1-\epsilon)^m\leq e^{-m\epsilon}$. Hence, the probability that $h$ is consistent with $f$ is less than $e^{-m\epsilon}$.
 
-        Now, there will be less than $\abs{C}$ hypotheses in $C$ that have an error bigger than $\epsilon$. Hence, by a union bound,
+        Now, there will (trivially) be less than $\abs{C}$ hypotheses in $C$ that have an error bigger than $\epsilon$. Hence, by a union bound,
         \begin{align*}
-            \mathbb{P}(\exists, h \text{ consistent with $f_*$ on $\overline{x}$ and with error greater than $\epsilon$ }) \leq \abs{C}e^{-m\epsilon}<\delta
+            \mathbb{P}(\exists \, h \text{ consistent with $f_*$ on $\overline{x}$ and with error greater than $\epsilon$ }) \leq \abs{C}e^{-m\epsilon}<\delta
         \end{align*}
         if $m \geq \tfrac{1}{\epsilon} \ln \left(\frac{\abs{C}}{\delta}\right)$. However, if there are no $h\in C$  consistent with $f_*$ on the and with error greater than $\epsilon$, the $h$ picked by $\calA$ must have an error smaller than $\epsilon$. Hence, $\mathbb{P}(e_{\calA,f_*,\mathbb{P}}>\epsilon)<\delta$, i.e., the claim. 
     \end{proof}
@@ -3196,7 +3245,7 @@ Now let us consider a quite general example -- any concept class of finite size,
 We have seen that any finite concept class $C$ can be learned with a sample size (for fixed $\epsilon$ and $\delta$) proportional to $\ln(\abs{C})$. We also know that there are classes that are infinite that are PAC learnable. There is in fact a general concept which can be used to determine if a class is PAC learnable, and if so, with what sample size: the so-called \emph{VC dimension} of the class (VC stands for Vapnik-Chervonenki, the inventors of the concept).
 
 \begin{defi}
-    Let $C$ be a concept class and $S=\sse X$ a subset. Let $C_S$ be the set of restrictions of $f\in C$ to $S$, i.e.
+    Let $C$ be a concept class and $S\sse X$ a subset. Let $C_S$ be the set of restrictions of $f\in C$ to $S$, i.e.
     \begin{align*}
         C_S = \{f:S \to {0,1} \, \vert \ f\in C\}.
     \end{align*}
@@ -3250,7 +3299,7 @@ must for all $i$ have the same sign as the $a_i$ -- if not, they would not be cl
 \end{align*}
 since the sum only consists of non-negative numbers, and at least one is positive. This is a contradiction to $\hat{w}$ producing the label $0$ for $x_0$!
 
-\paragraph{Example} The set of continuous functions on an interval $I$ clearly has VC dimension equal to $\infty$ -- for any set of points $x_i$ and values $y_i$, a piecewise linear function $\lambda$ with $x_i$ as functions and $\lambda(x_i)=y_i$ realises the function $f(x_i)=y_i$, and is in the class of continuous function  
+\paragraph{Example} The set of continuous functions on an interval $I$ clearly has VC dimension equal to $\infty$ -- for any set of points $x_i$ and values $y_i$, a piecewise linear function $\lambda$ with $x_i$ as functions and $\lambda(x_i)=y_i$ realises the function $f(x_i)=y_i$, and is in the class of continuous functions.
 
 \subsection{The 'fundamental theorem' of PAC learning}
 
@@ -3264,7 +3313,7 @@ Why have we introduced the VC dimension? Because it distinguishes the classes th
     \end{align*}
 \end{theorem}
 
-We will not prove the positive statement of this theorem, i.e. that a class is learnable, with the claimed sample size. We will however prove the to some extent more surprising part -- that we cannot learn a class with infinitely VC dimension. This follows immediately from the following.
+We will not prove the positive statement of this theorem, i.e. that a class is learnable if its VC dimension is finite. We will however prove the to some extent more surprising part -- that we \emph{cannot} learn a class with infinitely VC dimension. This follows immediately from the following.
 
 \begin{prop}
     Suppose that the VC dimension of the class $C$ is greater than $d$. Then, for any hypothesis class $H$ and any algorithm $\calA: \calS_C\to H$, there exists a $\mathbb{P}$ so that 
@@ -3314,6 +3363,184 @@ There is no learning theory included in the coursebook. We recommend the lecture
     Consider the set of fully connected networks (with an arbitrary number of layers and neurons per layer) as a concept class $C_{\mathrm{NN}}$ of functions on a bounded and closed interval. What is its VC-dimension?
 \end{exercise}
 
+\section{Non-linear dimensionality reduction methods}
+% Multidimensional scaling
+\subsection{Multidimensional scaling}
+In Chapter 2, we discussed PCA, the by far most popular dimensionality reduction algorithm. We gave two interpretations of it: given data $X\in \R^{n,p}$, the principial directions describe (i) the $r$-dimensional subspace that best fits the data (ii) the $r$ direction in which the data $X$ varies the most. Let us start this chapter by giving a third interpretation. 
+
+For a data-matrix $X$, let us define the \emph{centered similarities} $s_{ij} =\sprod{x_i-\overline{x},x_j- \overline{x}}$ as the inner product between the centered datapoints. Given a dimension $r$, we can now ask the question: Which $y_i\in \R^r$ best fits these similarities? More exactly, we can ask what the solution of 
+\begin{align}
+    \min_{Y\in \R^{n,r}} \sum_{i,j} \left(s_{ij} - \sprod{y_i-\overline{y},y_j-\overline{y}}\right)^2. \label{eq:classical_scale}
+\end{align}
+is. The answer is that it is the score-vectors corresponding to the $r$ first principial components.
+\begin{theorem}
+    The problem \eqref{eq:classical_scale} is solved by the eigenvectors to the $r$ biggest eigenvalues of the matrix $\overline{X}\overline{X}^T$, where $\overline{X}$ is the centered version of the data-matrix. That is, the problem is solved by calculating the $r$-dimensional score-vector associated to a PCA of $X$.
+\end{theorem}
+\begin{proof}
+    We have $s_{ij}= \overline{X}\overline{X}^T$. The problem we are trying to solve is hence
+    \begin{align}
+        \min_{Y\in \R^{n,r}} \norm{\overline{X}\overline{X}^*-\overline{Y}\overline{Y}^*}_F^2, \label{eq:rankr}
+    \end{align}
+    where $F$ is the Frobenius-norm, i.e. $\ell_2$-norm for matrices.
+
+    It is not hard to convince oneself (for instance by considering eigen-/Cholesky decompositions) that a matrix $M\in \R^{n,n}$ can be written as $YY^T$ for a matrix $Y\in \R^{n,r}$ if and only if it is symmetric and it has rank less than $r$. What we are looking for is hence the solution of the problem
+    \begin{align*}
+        \min_{\substack{\mathrm{rank}(M)\leq r  \\M\in \R^{n,n} \\ M \text{ sym.}}} \norm{XX^*-M}_F^2.
+    \end{align*}
+    Now remember that $\overline{X}\overline{X}^T = \Psi\Sigma \Psi^*$, where $\Psi$ contains the principal components as rows and $\Sigma$ is diagonal. It is not hard to show that
+    \begin{align*}
+       \norm{\overline{X}\overline{X}^*-M}_F = \norm{\Psi(\Sigma-\Psi^*M\Psi)\Psi^*}_F = \norm{
+       \Sigma-\Psi^*M\Psi}_F.
+    \end{align*}
+    Now, $\mathrm{rank}(M)= \mathrm{rank}(\Psi^*M\Psi)=\mathrm{rank}(N)$, so that the problem \eqref{eq:rankr} is equivalent to 
+    \begin{align*}
+        \min_{\mathrm{rank}(N)\leq r} \norm{\Sigma-N}_F^2.
+    \end{align*}
+    This problem is however not hard to solve, since $\Sigma$ is diagonal -- we see that $N$ also must be diagonal, and that it must contain exactly the $r$ first eigenvalues (a formal argument proceeds by induction similar to the proof of Theorem \ref{th:svd} in Chapter 2), say $N=\Sigma_0^r$. Hence,  $M=\Psi\Sigma_0^r\Psi^*$ solves \eqref{eq:rankr}, and by some simple algebra this matrix is equal to $Z^r(Z^r)^*$, where $Z$ is the matrix of the $r$ first PCA scores.
+\end{proof}
+
+\paragraph{Multi dimensional scaling} The above theorem is interesting in that it gives a 'metric' interpretation of the SVD: It shows that the SVD gives the best way of choosing 'low-dimensional representatives' $y_i\in \R^r$ to mimic the similarities $s_{ij}$. Is this what we want from dimension reduction? About this we can argue, but it is clearly not the most natural thing to go after.  What do we want from a dimension reduction map $\Phi: \R^p \to \R^r$ is that $\Phi(x)\approx \Phi(x')$ if and only if $x\approx x'$. A mathematical way to express this is to say that the distance between $\Phi(x)$ and $\Phi(x')$ should be approximately the same as the distance between $x$ and $x'$ :
+\begin{align} \label{eq:metric}
+    \norm{\Phi(x)-\Phi(x')}_2 \approx \norm{x-x'}_2.
+\end{align}
+ This gives a natural idea: Instead of mimicking the similarities with the representatives, let's mimic the distances, i.e. to solve the following problem:
+\begin{align*}
+    \min_{Y \in \R^{n,r}} \sum_{i,j} (\norm{x_i-x_j}_2-\norm{y_i-y_j}_2)^2.
+\end{align*}
+This method is (the standard version of) \emph{multi-dimensional scaling}, sometimes also referred to as the \emph{Kruskal-Shephard} scaling. In contrast to PCA, 
+there is no closed form solution of this problem, and one often resorts to either specialized iterative algorithms, or simply gradient descent, to solve it in practice. This causes it to be more expensive than PCA, but can give better results.
+
+
+
+
+\paragraph{Remark} The problem \eqref{eq:classical_scale} that PCA solves called \emph{classical scaling}.
+
+\
+
+In many settings, there is more than one way to measure the distance between data-points. When the data lives in Euclidean spaces, resorting to the Euclidean norm is natural, but maybe not the best option. In other applications, the data may not live in Euclidean space -- think of text data, for instance -- and necessarily needs to be compared by other means. This is not a problem for multi-dimensional scaling -- even if the distances $d_{ij}= \mathrm{dist}(x_i,x_j)$ is not given by a norm, we can apply it without thinking.
+
+What about classical scaling? It is less trivial to see, but one can in fact apply it with only the knowledge of the distances $d_{ij}$, in the following sense.
+\begin{lemma}
+    Let $\phi:\R^{n,n}\to \R^{n,n}$ denote the 'double centering map':
+    \begin{align*}
+        \phi(M) = (\id-\tfrac{1}{n}\one \one^*) M(\id-\tfrac{1}{n}\mathds{1}\mathds{1}^*).
+    \end{align*}
+    Then, if $D_{ij}=\norm{x_i-x_j}^2$ and $S_{ij} = \sprod{x_i-\overline{x},x_j-\overline{x}}$ for some vectors $x_i\in \R^p$, we have
+    \begin{align*}
+        S = -\tfrac{1}{2}\phi(D)
+    \end{align*}
+\end{lemma}
+\begin{proof}
+   To simplify the notation, let us write $C=\id-\tfrac{1}{n}\one \one^*$. We have $\overline{x}= \tfrac{1}{n}X^*\one$. Therefore, we can rewrite the centered matrix $\overline{X}$ as 
+   $$X-\tfrac{1}{n}  \one (X^*\one)^* = X-\tfrac{1}{n}  \one\one^* X = CX.$$
+    Consequently
+    \begin{align*}
+        S = \overline{X}\overline{X}^* = CXX^*C,
+    \end{align*}
+    where we in particular used $C=C^*$. Consequently, since $C^2=C$ ($C$ is the orthogonal projection onto the orthogonal complement of $\one$, $S=CSC$.
+    
+    Now, let us notice that
+    \begin{align*}
+        D_{ij}= \norm{x_i-x_j}_2^2= \norm{\overline{x}_i-\overline{x}_j}_2^2 = \norm{\overline{x}_i}_2^2 + \norm{\overline{x}_j}_2^2 - 2\sprod{\overline{x}_i,\overline{x}_j} = (n\one^*+\one n^*-2S)_{ij},
+    \end{align*}
+    where we defined $n_i = \norm{\overline{x}_i}_2^2$. Consequently
+    \begin{align*}
+        CDC = C(n\one^*+\one n^*-2S)C = -2S,
+    \end{align*}
+    Since $C\one=0$ and therefore $\one^*C=0$. This is the claim.
+
+    
+   
+\end{proof}
+The benefit in applying classical scaling instead of 'standard'  multi-dimensional scaling is again that it is \emph{computationally} simpler -- the computational complexity is comparable to performing a PCA.
+
+
+\subsection{Isomap} 
+An important choice when applying a multi-dimensional scaling method is which distance to use on the data space $\R^p$. When the data is vector space valued, we already mentioned that the Euclidean distance is natural, but maybe not the best shot. To exemplify what we mean, let us consider the famous \emph{Swiss roll} (toy) data set (Fig. \ref{fig:swiss}). The points in this dataset apparently lie on a two-dimensional surface (manifold). By 'unrolling' the Swiss roll, we should be able to find a good, two-dimensional representation of it. However, because of the way the surface is embedded into $\R^3$, using a metric scaling method with Euclidean distance in the feature space will not cut it: Points close to the 'lower loops' will be measured as close, although they are very far away in the 'manifold distance'.
+
+The \emph{Isomap} algorithm is an elegant way to mitigate this problem. The idea of the algorithm is simple: Given data, we begin by constructing a graph, connecting each point to its $k$ closest points (for some $k$, a hyperparameter of the method). To these closest points, the distance is defined as the same as in the Euclidean space. To any other points, however, we re-calculate the distance by computing shortest paths in the graph. In this manner, the distance is measured 'along the data' and hopefully will better capture the geometry of the dataset. See Figure \ref{fig:isodistance} . for an illustration. For speed, one often chooses the classical scaling method for the last step (this is the default in \texttt{sklearn}, for instance), but the algorithm can in principle also be applied with e.g. Kruskal scaling. 
+
+The difference in applying Isomap and standard multidimensional scaling is striking for the Swiss roll -- again see Figure \ref{fig:swiss}.
+
+
+
+
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{graphics/swiss_roll.png}
+    \caption{Left: the Swiss roll. Middle: The output of multi-dimensional scaling applied to the swiss roll. Right: The output of Isomap.}
+    \label{fig:swiss}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{graphics/distance_isomap.png}
+    \caption{Left: A spiral, where the points have been color-coded according to the distance to the red point. Right. The same dataset, but with the $6$-nearest neighbor graph superimposed, and color codings according to the shortest path-distance in said graph.}
+    \label{fig:isodistance}
+\end{figure}
+
+
+% ISOMAP
+
+% Autoencoders
+
+\subsection{Autoencoders}
+Let us end this chapter by discussing a completely different approach to dimensionality reduction: the so-called \emph{autoencoder} idea. To get to this idea naturally, let us forget the 'metric' desideratum \eqref{eq:metric} for a moment, and instead follow another principle: A dimension-reduction method is \emph{only good if little information is lost}. That is, there should exist a way to \emph{decode} the dimension reduction map $\Phi$
+\begin{align*}
+    \exists \, \Delta: \R^r \to \R^p : \Delta \circ \Phi(x_i) = x_i \text{ for all data $x_i$.}
+\end{align*}
+Note that the 'for all data' is crucial here -- if we want it to be true for all $x\in \R^p$, and want $\Delta$ and $\Phi$ to be reasonable (e.g. continuous), we will not be able to reduce the dimension ($r\geq p$ in that case).
+
+\paragraph{Remark} We have in fact already seen a concept that can be used this way: compressed sensing. The 'dimension-reduction method' here is to simply multiply the data with a Gaussian random matrix. This will work if the $x_i$ are inherently sparse. The decoder here $\Delta$ is the LASSO. In fact, this simple idea is sometimes used to reduce computational complexity -- it is then often called \emph{sketching}. The main pro of this approach is that it is extremely cheap.
+
+\
+
+How do we use this idea to reduce the dimension of a concrete  is to \emph{set up models} $\Phi$ and $\Delta$ for a given dataset? The idea is simple: We simply set up statistical models $\Phi$ and $\Delta$, that we then train to satisfy $\Delta \circ \Phi(x_i)=x_i$ for the data by using a loss function
+\begin{align*}
+    R(\theta_\Phi,\theta_\Delta) = \sum_{i \in [n]}\ell(\Delta_{\theta_\Delta}(\Phi_{\theta_\Phi}(x_i)),x_i)
+\end{align*} A well-suited model to use for the en- and decoders are neural networks. In fact, we can set up the auto-encoder as a single neural network, and simply interpret the 'early' layers as the encoder and the 'late' layers as the decoder. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{graphics/auto_encoder_architecture.png}
+    \caption{The idea of an autoencoder architecture}
+    \label{fig:placeholder}
+\end{figure}
+
+\subsection{Autoencoders as generative models -- VAEs}
+The encoder part of an autoencoder, as any other dimension reduction method, maps the data into a space into a \emph{latent space}. This latent space can be seen as an abstract vector space in which the data 'naturally lives'. What happens if now simply draw a point at random in this space, and use the decoder to reconstruct it? If the auto-encoder has spread out the data  into 'the whole' latent space $\R^r$, this point should be reasonably close to something in the data (or at least a point onto which a point in the underlying probability distribution would be mapped). Due to continuity of the decoder, it will therefore be decoded to something that is reasonably close to the data. Hence, we can use the decoder as a way to \emph{generate new data}!
+
+If we train an autoencoder without any regularization, it is not very reasonable that the feature space is filled out. In more exact terms, it is not very reasonable that the representations $y_i=\Phi(x_i)$ are distributed according to some simple distribution $p$ (say, standard Gaussian), from which we easily can sample. The distribution we get from decoding $z_i$ we draw according to $p$ will then not resemble the distribution of the training data. If this is our main aim, we need to make sure this happen. A way to ensure this is to train a \emph{variational autoencoder}. 
+
+The idea of the variational autoencoder is as follows: The encoder $\Phi$ maps each point $x$ to a point in the $\R^r$, but rather to a \emph{distribution} $q_{\Phi(x)}$ on $\R^r$. By running samples of $q_{\Phi(x)}$ through the decoder $\Delta$, we obtain a distribution of points on $\R^p$ again. We know train $\Phi$ and $\Delta$ to make sure that
+\begin{itemize}
+    \item $\Delta \circ \Phi(x) \approx \delta_x$ -- that is, the samples we get out of $\Delta \circ \Phi(x)$ are all very close to $x$. This we ensure by a term $\int\ell(x,\Delta(z))\mathrm{d} q_{\Phi(x)}(z)$ in the loss function. This can in general not be calculated exactly, of course, but we can easily 
+    \item The distributions $q_{\Phi(x)}$ are all close to a prior distribution $p$ that we specify. We can for instance include a term $\mathrm{KL}(q_{\Phi(x)},p)$ in the loss -- the Kullback Leibler divergence from $q_{\Phi(x)}$ to $p$
+\end{itemize}
+In this way, drawing a point from $x$ and then sampling from $q_{\Phi(x)}$ will yield points in the feature space approximately distributed as $p$, and decoding samples from $p$ with $\Delta$ will generate a distribution of points on $\R^p$ close to the original data distribution.
+
+Now, a neural network on a real computer of course cannot handle data distributions as infinite dimensional objects. We solve this by parametrizing them: A popular choice is to let the $q_{\Phi(x)}$ to be Gaussian, with a mean and variance $\mu(x),\sigma(x)$ that depend on $x$. The $\Phi(x)$-function in practice learns the functions $\mu(x)$ and $\sigma(x)$. This is also practical (1) since the KL-divergence between a general Gaussian and a prescribed standard Gaussian $p$ is simple to compute (2) the prescribed standard Gaussian distribution is simple to sample from.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.2\linewidth]{graphics/pca.png}\includegraphics[width=0.2\linewidth]{graphics/mds.png}\includegraphics[width=0.2\linewidth]{graphics/isomap.png}\includegraphics[width=0.2\linewidth]{graphics/auto_encoder.png}\includegraphics[width=.2\linewidth]{graphics/variational_autoencoder.png}
+    \caption{The result of applying (from left to right) PCA, MDS, Isomap, a (neural network) autoencoder and a (neural network) variational autoencoder to the \texttt{digits} dataset in \texttt{sklearn} to produce a two-dimensional representation of the data . (For the variational auto-encoders, we plot the means $\mu(x)\in \R^2$ to represent the distributions the encoder outputs). The colors correspond to the labels - these were however not used during training. We see that all methods put images of the same numbers close to each other, but they do it in slightly different ways.}
+    \label{fig:placeholder}
+\end{figure}
+
+% variational autoencoders: https://arxiv.org/pdf/1906.02691
+\subsection{Recommended further reading and exercises}
+Non-linear clustering methods are not treated in the course book. Its more mathematical sibling, \emph{The elements of statistical learning} \cite{hastie2009elements} does so (in Chapter 14). The paper introducing the Isomap algorithm, \cite{tenenbaum2000global}, is a nice and short read, with a higher focus on application. A more thorough introduction to variational autoencoders, which however is quite mathematically heavy, can be found in \cite{kingma2019introduction}. 
+
+\begin{exercise}
+    Can PCA be turned into an autoencoder? Can multidimensional scaling be? Explain.
+\end{exercise}
+
+\begin{exercise}
+    The hyperparameter $k$, the number of nearest neighbors in the graph, of Isomap is a tuneable parameter. Argue that if it is set very high, the output of Isomap will be essentially the same as PCA.
+\end{exercise}
 
 \bibliographystyle{IEEEtran}
 \bibliography{stat_biography}
