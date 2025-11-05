@@ -728,7 +728,7 @@ We can of course try to use a linear classifier $\sprod{x,\beta}$ to predict $y$
 
 Before getting to concrete methods, let us explain the concept of an \textbf{decision boundary} of a classifier. Note that every classifier function $f: X \to \{0,1\}$ will divide $X$ into two sets
 \begin{align*}
-    \mathds{0} = \{x \, \vert \,  f(x)=0\} , \quad \mathds{1} = \{x \, \vert f(x)=1\}.
+    X^-= \{x \, \vert \,  f(x)=0\} , \quad X^+= \{x \, \vert f(x)=1\}.
 \end{align*}
 The boundary of any of those sets is called the decision boundary. It can be thought of as the 'region' where the classifier 'changes its mind'. As a simple example we can use the classifier which decides the class by looking at the sign of the first feature:
 \begin{align*}
@@ -873,7 +873,7 @@ If we assume that $A$ is convex, this is a convex minimization problem, that hen
 
 It is more common to express the generalized linear model through a so called \emph{link function}. One can show (see the exercises) the following relation for the expected value:
 \begin{align}
-     \erw(z \, \vert \theta) = A'(\theta). \label{eq:mean}
+     \erw(y \, \vert \theta) = A'(\theta). \label{eq:mean}
 \end{align}
 Since we have assumed that $A$ is convex, $A'$ will be injective, so that it can be inverted. This means that the model assumption can be in an inverse form, which often is done:
 \begin{align*}
@@ -1464,7 +1464,7 @@ A decision tree is a tree in a graph sense -- i.e., it is a graph without cycles
 
     \begin{figure}
         \centering
-        \includegraphics[width=0.5\linewidth]{decision_tree.png}
+        \includegraphics[width=0.5\linewidth]{graphics/decision_tree.png}
         \caption{A simple decision tree for deciding whether to bring an umbrella.}
         \label{fig:Tree}
     \end{figure}
@@ -1642,7 +1642,7 @@ That is, we decide on a classification using a \emph{weighted} majority vote -- 
 \begin{align} \label{eq:err}
     E = \sum_{i\in[n]} e^{-y_if^m(x_i)}
 \end{align}
-What minimizing $E$ means is clear -- if $y_i=1$, $f_m(x_i)$ should be as large as possible, and if $y_i=-1$, it should be as negative as possible -- this is exactly what we want from the classifier $f^m$!\footnote{There is  more sophisticated ways to motivate the use of an exponential loss, related to the fact that the $y_i$ are binary  -- see \cite[Chapter 10]{hastie2009elements}.} \newline
+What minimizing $E$ means is clear -- if $y_i=1$, $f_m(x_i)$ should be as large as possible, and if $y_i=-1$, it should be as negative as possible -- this is exactly what we want from the classifier $f^m$!\footnote{There is  more sophisticated ways to motivate the use of an exponential loss, related to the fact that the $y_i$ are binary  -- see \cite[Chapter 10]{hastieElements}.} \newline
 
 We can rewrite $E$ as follows
 \begin{align*}
@@ -3532,7 +3532,7 @@ Now, a neural network on a real computer of course cannot handle data distributi
 
 % variational autoencoders: https://arxiv.org/pdf/1906.02691
 \subsection{Recommended further reading and exercises}
-Non-linear clustering methods are not treated in the course book. Its more mathematical sibling, \emph{The elements of statistical learning} \cite{hastie2009elements} does so (in Chapter 14). The paper introducing the Isomap algorithm, \cite{tenenbaum2000global}, is a nice and short read, with a higher focus on application. A more thorough introduction to variational autoencoders, which however is quite mathematically heavy, can be found in \cite{kingma2019introduction}. 
+Non-linear clustering methods are not treated in the course book. Its more mathematical sibling, \emph{The elements of statistical learning} \cite{hastieElements} does so (in Chapter 14). The paper introducing the Isomap algorithm, \cite{tenenbaum2000global}, is a nice and short read, with a higher focus on application. A more thorough introduction to variational autoencoders, which however is quite mathematically heavy, can be found in \cite{kingma2019introduction}. 
 
 \begin{exercise}
     Can PCA be turned into an autoencoder? Can multidimensional scaling be? Explain.
