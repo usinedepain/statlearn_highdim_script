@@ -746,12 +746,12 @@ The decision boundary in this case is the plane $x(0)=0$.
 
 \subsection{Bayes classifier} 
 It is clear that a reasonable error measure for a classifier $f$ is the probability for it to makes on average, i.e.
-\begin{align} \label{eq:error}
+\begin{align} \label{eq:error_rate}
     \mathbb{P}(y\neq f(x)).
 \end{align}
 It is actually possible, in theory, to find the global minimizer among all functions $f:X\to \{0,1\}$. 
 \begin{theorem}
-    For a given distribution, the error rate \eqref{eq:error} is minimized by the so-called \emph{Bayes classifier} that assigns a data point to the most probable class conditioned on $x$, i.e.
+    For a given distribution, the error rate \eqref{eq:error_rate} is minimized by the so-called \emph{Bayes classifier} that assigns a data point to the most probable class conditioned on $x$, i.e.
     \begin{align*}
         f_{\mathrm{Bayes}}(x) = \mathrm{argmax}_{k\in \{0,1\}} \mathbb{P}(Y=k \, \vert \, x)
     \end{align*}
@@ -877,7 +877,7 @@ It is more common to express the generalized linear model through a so called \e
 \end{align}
 Since we have assumed that $A$ is convex, $A'$ will be injective, so that it can be inverted. This means that the model assumption can be in an inverse form, which often is done:
 \begin{align*}
-    g(\mu) = g( \erw(z \, \vert \theta)) = \sprod{\beta,x}.
+    g(\mu) = g( \erw(y \, \vert \theta)) = \sprod{\beta,x}.
 \end{align*}
 The function $g$ is the so-called \emph{link function}, the inverse of $A'$.
 
@@ -895,7 +895,7 @@ Least square-fitting is hence the same as fitting a random variable with a mean 
 
 \paragraph{Logistic regression} Our Bernoulli-variable from above has the form
 \begin{align*}
-      \mathbb{P}(z=k \, \vert \theta) = \begin{cases} \frac{o^k}{1+o} & \text{ k = 0,1 } \\ 0 & \text{ else} \end{cases}
+      \mathbb{P}(y=k \, \vert \theta) = \begin{cases} \frac{o^k}{1+o} & \text{ k = 0,1 } \\ 0 & \text{ else} \end{cases}
 \end{align*}
 where $o$ is the odds (insert $k=0$ and $k=1$ to see that it is true!). This can also be written as follows:
 \begin{align*}
