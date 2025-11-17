@@ -745,7 +745,7 @@ The decision boundary in this case is the plane $x(0)=0$.
 
 
 \subsection{Bayes classifier} 
-It is clear that a reasonable error measure for a classifier $f$ is the probability for it to makes on average, i.e.
+It is clear that a reasonable error measure for a classifier $f$ is the probability for it to make mistakes on average, i.e.
 \begin{align} \label{eq:error_rate}
     \mathbb{P}(y\neq f(x)).
 \end{align}
@@ -857,7 +857,7 @@ It is not hard to see that an example is assigned to the $k$ for which $\sprod{\
 \subsection{Outlook: Generalized Linear Models}
 Logistic regression, as is standard linear regression, is a special case of a so-called \emph{generalized linear models}. The basic assumption of a generalized linear model is that given the value of $x$, the label $y$ follows a one-parameter distribution where the parameter depends on a linear feature $\sprod{\beta,x}$ in  a certain way. This distribution is then fitted to the data at hand, for instance through maximum likelihood.
 
-The family of distribution is most often assumed to be a so-called \emph{exponential family}. For a continuous variable, that is a family of variables with probability distribution functions of the form\footnote{One can also allow a probability measure of the form $h(y) \exp(\sprod{\theta,T(y)} - A(\theta)) $ f or a function $T$ -- one then simply needs to transform the data $z_i=T(y_i)$ to return to the formulation discussed here}
+If the family of distributions is most assumed to be a so-called \emph{exponential family}, we can do more elegant mathematics. For a continuous variable, that is a family of variables with probability distribution functions of the form\footnote{One can also allow a probability measure of the form $h(y) \exp(\sprod{\theta,T(y)} - A(\theta)) $ f or a function $T$ -- one then simply needs to transform the data $z_i=T(y_i)$ to return to the formulation discussed here}
 \begin{align*}
     p(y \, \vert \theta ) = h(y) \exp(\sprod{\theta,y} - A(\theta))
 \end{align*}
@@ -1216,7 +1216,7 @@ Hence, $\beta^*$ has an optimal value no worse than the optimal one for the prim
 \end{align*}
 \end{proof}
 
-We have in fact already analysed what $L(\beta^*,\gamma^*) = \inf_{\beta} L(\beta,\gamma^*) = \sup_\gamma L(\beta^*,\gamma)$ means. The first equation means that $\beta$ is them minimizer of $L(\beta,\gamma^*)$, which is the case when
+We have in fact already analysed what $L(\beta^*,\gamma^*) = \inf_{\beta} L(\beta,\gamma^*) = \sup_\gamma L(\beta^*,\gamma)$ means. The first equation means that $\beta$ is the minimizer of $L(\beta,\gamma^*)$, which is the case when
 \begin{align*}
      \beta^* &= \sum_{i \in [n]} \gamma_i^* y_i x_i
 \end{align*}
@@ -1272,7 +1272,7 @@ The optimality conditions now read
     \gamma_i^*(1-\epsilon_i^*-y_i \sprod{\beta^*,x_i})&=0\\
     \epsilon_i^*(\lambda-\gamma_i^*)&= 0.
 \end{align*}
-Notice that the support vectors are now given by the vectors with $1-\epsilon_i^*-y_i \sprod{\beta^*,x_i}$. They can hence be vectors that violate the constraint $y_i \sprod{\beta^*,x_i}\geq 1$! See also figure \ref{fig:svm_soft}
+Notice that the support vectors are now given by the vectors with $1-\epsilon_i^*=y_i \sprod{\beta^*,x_i}$. They can hence be vectors that violate the constraint $y_i \sprod{\beta^*,x_i}\geq 1$! See also figure \ref{fig:svm_soft}
 
 \begin{figure}
     \centering
@@ -1434,13 +1434,13 @@ Recommended exercises in An Introduction to Statistical Learning are 9.7.2 and 9
 \end{exercise}
 
 \begin{exercise}
-    (\emph{Challenging}) Use the dual form of the SVM problem to argue that the solution $\beta^*$ of it is the vector in the \emph{convex hull} of the vectors $x_iy_i \in \R^p, i\in[n]$ that is closest to the origin. 
+    (\emph{Challenging}) Use the dual form of the SVM problem to argue that the primal solution $\beta_*$ is parallell to the vector in the \emph{convex hull} of the vectors $x_iy_i \in \R^p, i\in[n]$ that is closest to the origin. 
     
     The convex hull of the $x_iy_i$ is thereby the set of vectors that can be formed as weighed averages of them, i.e
     \begin{align*}
         \{ \sum_{i \in [n]} \theta_i x_iy_i \, \vert \sum_{i\in [n]} \theta_i= 1, \theta_i \geq 0 \}
     \end{align*}
-    \emph{Hint}: Show that the dual-optimal $\gamma^*$ must fulfill $\sum_i \gamma_i^*=1$, by studying how scaling of $\gamma$ affects the function that is optimized in the dual problem.
+    \emph{Hint}: Study how scaling of $\gamma$ affects the function that is optimized in the dual problem.
 \end{exercise}
 
 \begin{exercise}
