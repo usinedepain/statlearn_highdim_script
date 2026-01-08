@@ -3284,9 +3284,9 @@ where we repeteadly used that $y_i$ are either $0$ or $1$. Hence, restricting th
 
 \underline{(b) The VC-dimension is at most $(d+1)$} Now, we must argue that no set of size $d+2$ can be shattered. To do this, take any set $x_i \in \R^d$ with $d+2$ points and consider the points $\hat{x}_i = [1,x_i] \in \R^{d+1}$. Since there are $d+2$ points, there must be one $\hat{x}_i$ that can be expressed as a linear combinations of the others, WLOG $x_0$:
 \begin{align*}
-    x_i = \sum_{i\geq 1} a_i x_i.
+    x_0 = \sum_{i\geq 1} a_i x_i.
 \end{align*}
-The $a_i$ cannot be all be zero, since $\hat{x}_0$ is not. Let us without loss of generality assume that there exists at least one $a_i$ with $a_i>0$ -- the case when all non-zero $a_i$ are negative is sensitive
+The $a_i$ cannot be all be zero, since $\hat{x}_0$ is not. Let us without loss of generality assume that there exists at least one $a_i$ with $a_i>0$ -- the case when all non-zero $a_i$ are negative is similar.
 
 
 Now, set $y_0= 0$, and for for $i \geq 1$, set the labels according to the signs of the $a_i$: If $a_i>0$, set $y_i=1$, and $y_i=0$ else. We claim that no function in $C_{\mathrm{hyp}}$ can realise the function $f(x_i)=y_i$. Suppose that there was. Then, 
