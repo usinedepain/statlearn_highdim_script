@@ -3497,7 +3497,7 @@ Note that the 'for all data' is crucial here -- if we want it to be true for all
 
 \
 
-How do we use this idea to reduce the dimension of a concrete  is to \emph{set up models} $\Phi$ and $\Delta$ for a given dataset? The idea is simple: We simply set up statistical models $\Phi$ and $\Delta$, that we then train to satisfy $\Delta \circ \Phi(x_i)=x_i$ for the data by using a loss function
+How do we use this idea to reduce the dimension of a concrete given dataset? The idea is simple: We simply set up statistical models $\Phi$ and $\Delta$, that we then train to satisfy $\Delta \circ \Phi(x_i)=x_i$ for the data by using a loss function
 \begin{align*}
     R(\theta_\Phi,\theta_\Delta) = \sum_{i \in [n]}\ell(\Delta_{\theta_\Delta}(\Phi_{\theta_\Phi}(x_i)),x_i)
 \end{align*} A well-suited model to use for the en- and decoders are neural networks. In fact, we can set up the auto-encoder as a single neural network, and simply interpret the 'early' layers as the encoder and the 'late' layers as the decoder. 
@@ -3516,7 +3516,7 @@ If we train an autoencoder without any regularization, it is not very reasonable
 
 The idea of the variational autoencoder is as follows: The encoder $\Phi$ maps each point $x$ to a point in the $\R^r$, but rather to a \emph{distribution} $q_{\Phi(x)}$ on $\R^r$. By running samples of $q_{\Phi(x)}$ through the decoder $\Delta$, we obtain a distribution of points on $\R^p$ again. We know train $\Phi$ and $\Delta$ to make sure that
 \begin{itemize}
-    \item $\Delta \circ \Phi(x) \approx \delta_x$ -- that is, the samples we get out of $\Delta \circ \Phi(x)$ are all very close to $x$. This we ensure by a term $\int\ell(x,\Delta(z))\mathrm{d} q_{\Phi(x)}(z)$ in the loss function. This can in general not be calculated exactly, of course, but we can easily 
+    \item $\Delta \circ \Phi(x) \approx \delta_x$ -- that is, the samples we get out of $\Delta \circ \Phi(x)$ are all very close to $x$. This we ensure by a term $\int\ell(x,\Delta(z))\mathrm{d} q_{\Phi(x)}(z)$ in the loss function. This can in general not be calculated exactly, of course, but we can easily approximate the integral by drawing a few $z$ and calculating an empirical average.
     \item The distributions $q_{\Phi(x)}$ are all close to a prior distribution $p$ that we specify. We can for instance include a term $\mathrm{KL}(q_{\Phi(x)},p)$ in the loss -- the Kullback Leibler divergence from $q_{\Phi(x)}$ to $p$
 \end{itemize}
 In this way, drawing a point from $x$ and then sampling from $q_{\Phi(x)}$ will yield points in the feature space approximately distributed as $p$, and decoding samples from $p$ with $\Delta$ will generate a distribution of points on $\R^p$ close to the original data distribution.
