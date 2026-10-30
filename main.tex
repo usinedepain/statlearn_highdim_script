@@ -141,7 +141,7 @@
 
     \vspace{1.5cm}
     
-    Winter term 2025 \\
+    Winter term 2026 \\
 
  \vspace{1.5cm}
     
@@ -181,9 +181,9 @@ We imagine that there is a (possibly very complicated)  mapping $f_*:X \to Y$ (a
 \begin{align}
     y_i = f_*(x_i) + \varepsilon_i, \label{eq:model}
 \end{align}
-where $\varepsilon_i$ is some random error. \textbf{The fundamental task of statistical learning is to infer $f_*$ from finitely pairs $(x_i,y_i)$ available to us}. The $(x_i,y_i)$ pairs are called the \textbf{training data}.
+where $\varepsilon_i$ are random. \textbf{The fundamental task of statistical learning is to infer $f_*$ from finitely pairs $(x_i,y_i)$ available to us}. The $(x_i,y_i)$ pairs are called the \textbf{training data}.
 
-A natural strategy is to try to find the function $f$ that 'fits' the training data the best -- the hope is that this function will generalize well also to unseen data. A general technique for doing this is to pick a function $\ell: Y \times Y \to \R$ that measures the error between two labels (a \textbf{loss}) and then pick the function that minimizes the \textbf{empirical risk} (or \textbf{training error})
+A natural strategy is to try to find the function $f$ that 'fits' the training data the best -- the hope is that this function will \emph{generalize} well also to unseen data. A general technique for doing this is to pick a function $\ell: Y \times Y \to \R$ that measures the error between two labels (a \textbf{loss}) and then pick the function that minimizes the \textbf{empirical risk} (or \textbf{training error})
 \begin{align*}
     R_e(f) = \tfrac{1}{n} \sum_{i \in [n]} \ell(f(x_i),y_i).
 \end{align*}
@@ -224,13 +224,13 @@ This problem is, as we all know, relatively easy to solve with a computer: solut
 \end{align*}
 
 \subsection{Bias-variance tradeoff}
-Which hypothesis class $\calF$ to choose depends on a lot of things -- among them are practical issues, such as the complexity of solving the ERM -- but a general guiding principle is given to us by the so-called \textbf{bias-variance} trade-off. To explain it, let us introduce some more notation. First, let us call the (random) data $(x_i,y_i)$ $D$, and the function obtained by training the model on the data $D$ $f_D$ (it can be obtained through empirical risk minimization, but also by some other method). This function will depend on the data, but it will give us an estimate on average:
+Which hypothesis class $\calF$ to choose depends on a lot of things -- among them are practical issues, such as the complexity of solving the ERM -- but a general guiding principle is given to us by the so-called \textbf{bias-variance} trade-off. To explain it, let us introduce some more notation. First, let us denote the (random) set of data points $(x_i,y_i)$ with the symbol $D$, and the function obtained by training the model on the data $D$ $f_D$ (it can be obtained through empirical risk minimization, but also by some other method). This function will depend on the data, but it will give us an estimate on average:
 \begin{align*}
     \widehat{f}(x) = \mathbb{E}_D f_D(x).
 \end{align*}
-The expectation here is with respect to the \emph{random draw of the data}.
+The expectation here is with respect to the \emph{random draw of the data}. We are hence imagining \emph{redrawing the data} many times from the true distribution, redoing the training and recording the estimates $f_D$ each time, and then taking the average to form $\widehat{f}(x)$.
 
-This mean estimate should optimally be close to the ground truth $f_*$, but this is not guaranteed (for instance, $f_*\notin \calF$ in general). In general, there is hence a discrepancy between the mean estimate $\widehat{f}$ and the ground truth $f_*$. This error is referred to as the \textbf{bias} of the model
+This mean estimate should optimally be close to the ground truth $f_*$, but this is not guaranteed (for instance, $f_*\notin \calF$ in general). There is hence typically a discrepancy between the mean estimate $\widehat{f}$ and the ground truth $f_*$. This error is referred to as the \textbf{bias} of the model
 \begin{align*}
     \mathrm{Bias}(f) = \mathbb{E}_x(\ell(\widehat{f}(x),f_*(x))).
 \end{align*}
@@ -242,7 +242,7 @@ Now, the actual estimator $f_D$ we learn is not equal to the average $\widehat{f
 where both here and above, the 'error measuring data' $x$ is independent of the draw of the training data $D$. 
 
 There is a fundamental relation between bias, variance and expected risk of a model:
-\begin{theorem}
+\begin{theorem}[Fundamental theorem of statistical learning] \label{th:fundamental}
     Assume that the error $\epsilon$ is independent of the (train and test) data $x$, and centered: $\erw(\epsilon)=0$. Then, for the square loss, $\ell(y,y')=(y-y')^2$, the expected risk decomposes as follows:
     \begin{align*}
         \erw_D R(f_D) = \mathrm{Bias}(f) + \mathrm{Var}(f) + \mathrm{Var}(\epsilon).
@@ -267,13 +267,13 @@ There is a fundamental relation between bias, variance and expected risk of a mo
 This theorem has fundamental consequences:
 \begin{itemize}
     \item First, we see that $\mathrm{Var}(\epsilon)$ is a fundamental lower bound on the risk. If the errors in our model $y=f(x)+\epsilon$ are large, there is no chance for us to learn the model -- this is natural.
-    \item In order for a model to perform well, we need it to have low bias \emph{and} low variance. It may in particular be better to have a model with a bit higher bias if it leads to a lot smaller variance, and vice versa.
+    \item In order for a model to perform well, we need it to have low bias \emph{and} low variance. It may in particular be better to have a model with a bit higher bias if it leads to a lot smaller variance, and vice versa. 
 \end{itemize}
-What does it mean for a model to have \emph{low bias}? It means that when smoothing out variations due to different training sets, it is accurate. Put differently, we can think of it as the modelling error -- when trying to fit a highly non-linear $f$ with a linear map, it will never be perfect, and therefore have a high bias. 
+What does it mean for a model to have \emph{low bias}? It means that when smoothing out variations due to different training sets, it is accurate. Put differently, we can think of it as the \texbf{modelling error}. As an example, when trying to fit a highly non-linear $f$ with a linear map, it will never be perfect, and therefore have a high bias. 
 
-What does it mean to have a \emph{low variance}? That means that the training of the model is insensitive to the drawing of the training data $D$ -- if the variance is small, we will get more or less the same $f_D$ no matter exactly which $D$ is drawn.
+What does it mean to have a \emph{low variance}? It means that the training of the model is \textbf{insensitive to the drawing of the training data $D$} -- if the variance is small, we will get more or less the same $f_D$ no matter exactly which $D$ is drawn. This intuitively is good, since we then need to worry less about being 'unlucky' when drawing the sample.
 
-Intuitively (and unfortunately) models with small bias will need to be very flexible to fit complicated data. Being flexible however necessarily means that it needs to be able to adapt to the training data, leading to a higher variance. This is \emph{generally} how it goes: going over to a more complicated and flexible model will lead to smaller bias but also higher variance. The key will be to find the sweet spot between the variance and the bias. This phenomenon is referred to as the \textbf{bias -- variance  tradeoff}.
+Unfortunately, there is typically a \textbf{bias -- variance  tradeoff}. Models with small bias tend to have high bias, and vice-versa. Intuitively, models with small bias will need to be very \emph{flexible} to fit complicated data. Being flexible however necessarily means that it needs to be able to \emph{adapt} to the training data, leading to a higher variance. This is \emph{generally} how it goes: going over to a more complicated and flexible model will lead to smaller bias but also higher variance. The key will be to find the sweet spot between the variance and the bias.
 
 \paragraph{Example} Let us explain bias and variance in the case of polynomial regression. We assume that $y=p(x)+\epsilon$ for some polynomial $p$ and $\epsilon \sim \mathcal{N}(0,1\mathrm{e-4})$, and draw $n$ training points $x_i \in [0,1]$. We can now try to fit polynomials of varying degree $d$ to our training data, using empirical risk minimization, with mean squared error as a loss function. We plot the results in Figure \ref{fig:poly}.
 
@@ -296,7 +296,7 @@ We conclude
 \subsection{Model evaluation and tuning}
 How do we determine if a machine learning model is performing well? A first idea is to have a look at the training loss. This however only gives a very rough - if any -- idea of its quality. Indeed, there are many situations where the training loss can be driven to zero -- i.e. the model can be made to fit the training labels perfectly -- but the model is rubbish. Think for example about the task of fitting a polynomial of high degree to data. If the degree is too high compared to the number of training samples, we will be able to interpolate the training labels perfectly without issue -- but this polynomial will most likely be extremely 'squiggly' and hence be terrible. This phenomenon, where the model fits the training data perfectly but generalizes badly to unseen data, is known as \textbf{overfitting}. 
 
-Looking at the test loss can hence only detect that we are not \textbf{underfitting}, i.e. not adapting enough to the training data $(x_i,y_i)$.  What we ultimately is interested is how well the model can \textbf{generalize} to unseen examples. The correct way of determining which out of two machine learning models perform better is thus to compare their \emph{expected risks}. Remember that for a reasonable loss function, a lower risk means a better fit. However, given a fixed set of training data, the expected risk cannot be cannot be calculated! We see that by looking at its definition:
+Looking at the test loss can hence only detect that we are not \textbf{underfitting}, i.e. not adapting enough to the training data $(x_i,y_i)$.  What we ultimately are interested in is how well the model can \textbf{generalize} to unseen examples. The correct way of determining which out of two machine learning models perform better is thus to compare their \emph{true expected test risks}. Remember that for a reasonable loss function, a lower risk means a better fit. However, given a fixed set of training data, the expected risk cannot be cannot be calculated! We see that by looking at its definition:
 \begin{align*}
     \text{Expected risk} = \mathbb{E}_{D,x,y} \ell(f_D(x),y)
 \end{align*}
@@ -308,11 +308,19 @@ A first, obvious strategy is to split the available data into two sets: One set 
 \end{align*}
 will be a (rough) estimate of the expected risk. Note that this strategy is very simple to implement -- and model agnostic.
 
-\subsubsection{Test set vs. validation set} In the machine learning research community, it is common practice to make split into a training set and validation set once, and then always use the error on that validation set to compare different methods. Such a validation set is called a test set. This has pros and cons: agreeing on one common test set eliminates the element of chance when comparing methods. On the other hand, because a low test risk now in itself becomes a 'quality measure' of a research project, a lot of energy will be spent on making the model perform well on the specific examples decided upon as the 'true' test set. 
+\subsubsection{Test set vs. validation set} In the machine learning research community, it is common practice to make split into a training set and validation set once, and then always use the error on that validation set to compare different methods. Such a validation set is called a test set. This has pros and cons: agreeing on one common test set eliminates the element of chance when comparing methods. On the other hand, because a low test risk now in itself becomes a 'quality measure' of a research project, there is a risk that a lot of energy will be spent on making the model perform well on the specific examples decided upon as the 'true' test set. 
 
-Importantly, a test set used to measure the quality \textbf{must not} be used to fine-tune the model (for example -- choosing the degree of the polynomial to use for polynomial interpolation) to obtain a better test score. If we do that we 'indirectly' let the machine learning model see the un-seen examples, which goes against the entire idea of generalization. Do not trust a stock-broker that can only show you that they can predict yesterday's stock prices!
+To do that is however \emph{fundamentally bad research practice}! A test set used to measure the quality \textbf{must not} be used to fine-tune the model (for example -- choosing the degree of the polynomial to use for polynomial interpolation) to obtain a better test score. If we do that we 'indirectly' let the machine learning model see the un-seen examples, which goes against the entire idea of generalization. Do not trust a stock-broker that can only show you that they can predict yesterday's stock prices!
 
-Most machine learning methods have 'meta-parameters' that can be chosen freely. A (by now almost overused) example by us is the degree of the polynomials in a polynomial regression (we will get to know other examples of such metaparameters later). Choosing the meta-parameters to optimize performance is referred to as \textbf{tuning} the model. When using data to tune the model, one should hence \textbf{never} use the test set. Instead, one should use a separate subset of the training data to estimate the test error. This set is often referred to as a \textbf{validation set}. 
+\begin{center}
+    \begin{tabular}{|l|l|}
+         \hline Dataset & Usage   \\
+            \hline Training  & Training, e.g form empirical risk. \\
+            Validation  & Tuning, choosing correct meta-parameters for training \\
+            Test & Testing, checking performance in the end \\
+            \hline
+    \end{tabular}
+\end{center}
 
 \subsubsection{Cross validation} Only using one set of observations as a validation set has two problems. First, we 'sacrifice' a part of the training data when we do not use it for training -- if we want a good estimate of the test error, that can be a significant part of the available data. Secondly, there is a high element of chance when drawing the validation set -- think for example about the consequences of drawing a validation set containing an outlier.
 
@@ -324,7 +332,7 @@ $CV_i$ hence denotes the validation loss when using $D_i$ as a validation set an
 
 The number $k$ of splits is free to choose, and its choice often boils down to practicality. The extreme case of using $k=n$, i.e. using validation sets of size $1$, called leave-one-out-training, could in principle be used. This would however be very expensive -- note that $k$-fold cross-validation requires us to repeat the training procedure $k$ times. Also, the smaller the $D_i$, the higher the overlap of the $\hat{D}_i$, leading to more correlated $CV_i$, leading to a worse estimate of the validation error. In practice, $k$ is  often chosen equal to either $5$ or $10$, since it empirically has been observed to give good estimates of the test error (on simulated data sets) while also not require too much extra training time.
 
-\subsubsection{Bootstrapping} A technique similar to cross validation in spirit, but used for slightly different purposes is so-called \emph{bootstrapping}. Here, one would like to obtain an understanding of the distribution of a parameter of a model depends on the training set -- that could be the test error, but it could also be e.g. a regression coefficient of a (non)-linear model. E.g. the variance of that distribution can in very special cases -- typically after making assumptions on the nature of the training data and noise -- can sometimes be determined theoretically, but for more complicated models, this is hard. 
+\subsubsection{Bootstrapping} A technique similar to cross validation in spirit, but used for slightly different purposes is so-called \emph{bootstrapping}. Here, one would like to obtain an understanding of the distribution of a parameter of a model depends on the training set -- that could be the test error (leading to a measure of the variance), but it could also be e.g. the value of a regression coefficient in a (non)-linear model. The variance of that distribution can in very special cases -- typically after making assumptions on the nature of the training data and noise -- be determined theoretically, but for more complicated models, this is hard. 
 
 One therefore needs to resort to empirically determine the distribution -- i.e., redo the training with different training sets and record what happens. Since one only has one training set, one needs to 'pull oneself up by the bootstraps' to get new ones. What this means is that new training sets are 'simulated' via drawing subsamples of the training sets. One can then repeat the training for each such 'bootstrapped' training set, measure the metric of interest each time, and then obtain information about the distribution of it. In bootstrapping, in contrast to cross-validation, one draws the training sets with rather than without replacement. This means that the training sets are correlated, so that the obtained distribution only is an approximation of the one obtained for truly independent draws of the training set.
 
@@ -344,13 +352,13 @@ The name of this course is statistical learning \emph{in high dimensions}. This 
 \end{itemize}
 Having many features inevitably leads to a high computational burden. With computers becoming more and more powerful by the day, that is however \textbf{not} the main problem with doing statistics in high dimension. That is instead that they, \emph{without thought}, will be \emph{too flexible and very prone to overfitting}.
 
-Let us formally explain the fundamental problem of high-dimensional statistics by taking a look at the familiar example of \emph{linear regression}. We remember the setting: We are given data $x_i \in \R^p$ and try to predict a response $y_i\in \R$ using a linear model $f(x)= a+ \sprod{\beta,x}$ for some $a\in \R$, $\beta \in \R^p$. To make the notational effort smaller, let us actually only write $f(x)=\sprod{\beta,x}$ -- by attaching a dummy feature with the value $1$ to all data-points $x_i$, we can still include an intercept. The empirical risk minimization problem with square loss, or MSE estimate (minimal least squares) of the parameters $\beta$ is then given by solution of
+Let us formally explain the fundamental problem of high-dimensional statistics by taking a look at the familiar example of \emph{linear regression}. We remember the setting: We are given data $x_i \in \R^p$ and try to predict a response $y_i\in \R$ using a linear model $f(x)= a+ \sprod{\beta,x}$ for some $a\in \R$, $\beta \in \R^p$. As we discussed earlier, we may by adding a dummy constant feature reduce the notational burden to $f(x)=\sprod{\beta,x}$. The empirical risk minimization problem with square loss, or MSE estimate (minimal least squares) of the parameters $\beta$ is then given by the solution of
 \begin{align}
     \min_{\beta \in \R^p} \tfrac{1}{2}\norm{X\beta-Y}_2^2. \label{eq:linreg}
 \end{align}
 In the high-dimensional setting, the number of observations $n$ is smaller than $p$, which means that $X$ is a 'short fat matrix'. It will therefore have  a non-trivial kernel, making the above problem \textbf{ill-posed}: It will \emph{always} have infinitely many solutions. Also, unless the data is 'degenerate', the matrix $X$ will have full rank, meaning that there \emph{always} exists \textbf{infinitely} many $\beta$ with $Y=X\beta$. 
 
-How should we know which one of them to pick? If we simply choose one 'at random', the variance becomes infinite, which we by the 'fundamental theorem of statistical learning' means that the generalization will be rubbish.
+How should we know which one of them to pick? If we simply choose one 'at random', the variance becomes infinite, which we by the 'fundamental theorem of statistical learning' (Theorem \ref{th:fundamental}) means that the generalization will be rubbish.
 
 We will encounter three 'approaches' to \textbf{regularizing} such ill-posed problems.
 \begin{enumerate}
@@ -391,7 +399,11 @@ In order to get an idea of the impact of the $\lambda$ parameter, let us analyse
     Let $\beta_\lambda$ denote the solution of \eqref{eq:ridgesol}. Assume that $X$ has full rank. Then
     \begin{itemize}
         \item $\lim_{\lambda \to \infty} \beta_\lambda = 0$
-        \item  Let $\beta_0$ denote the solution to $X\beta =Y$ with minimal $\ell_2$-norm. Then, $\lim_{\lambda \to 0^+} \beta_\lambda=\beta_0$
+        \item  Let $\beta_0$ denote the solution to $X\beta =Y$ with minimal $\ell_2$-norm, i.e. 
+        \begin{align*}
+            \beta_0 = \mathrm{argmin}_{\beta\in \R^p} \|\beta\|_2^2 \text{ subject to  } X\beta=Y.     
+        \end{align*}
+        Then, $\lim_{\lambda \to 0^+} \beta_\lambda=\beta_0$
     \end{itemize}
 \end{prop}
 
@@ -433,31 +445,31 @@ Here, we used that $V$ is orthogonal, so that $\id = VV^^*$. Now, let us again w
 
 Let us now interpret this proposition.
 
-\paragraph{High regularization} When \textbf{$\lambda$ is very high}, ridge regression will \emph{for any data} put out a $\beta$ close to zero.  It will thus change much for different draws of the data, so that the \textbf{variance is low}. On the other hand, for most ground truths, $\beta\approx 0$ will be a bad estimator, so that the \textbf{bias is high}.
+\paragraph{High regularization} When \textbf{$\lambda$ is very high}, most emphasis is put on keeping the norm of $\beta$ small. Consequently, ridge regression will \emph{for any data} put out a $\beta$ close to zero.  It will thus change much for different draws of the data, so that the \textbf{variance is low}. On the other hand, for most ground truths, $\beta\approx 0$ will be a bad estimator, so that the \textbf{bias is high}.
 
-\paragraph{Low regularization} For \textbf{$\lambda$ very small} $\beta$ will be very close to the minimal $\ell_2$-norm solution of $X\beta = Y$. This object behaves in a more complicated manner on $X$, and it is therefore a bit harder to analyze.
+\paragraph{Low regularization} For \textbf{$\lambda$ very small}, most emphasis is instead put on keeping the error $\|X\beta-Y\|_2^2$ small.   $\beta$ will be very close to being (the minimal $\ell_2$-norm-) solution of $X\beta = Y$. This object behaves in a more complicated manner on $X$, and it is therefore a bit harder to analyze.
 
 To be able to do it, let us assume that the ground truth assumption is perfect, i.e. that that there exists a $\beta_*$ with $y=\sprod{\beta_*,x}$ (no noise). Then, one can argue that the optimal solution $\beta_0$ of \eqref{eq:ridgeregression} will be equal to \emph{the projection of $\beta_*$ onto the orthogonal complement of the kernel of $X$}, which is the same as the span of the feature vectors $x_i$:
 \begin{align*}
-    \beta_0 = \text{Projection of $\beta_*$ onto $\mathrm{span}(x_i)$}
+    \beta_0 = \text{Projection of $\beta_*$ onto $\ker(X)^\perp = \mathrm{span}(x_i)$}
 \end{align*}
 We now note that 
 for vectors $\tilde{x}$ in $\mathrm{span}(x_i)$,  $\sprod{\beta_0,\tilde{x}}= \sprod{\beta_*,\tilde{x}}$, i.e., the classifications will be correct. If instead $\tilde{x}$ lies outside $\mathrm{span}(x_i)$, the classifications will be wrong. Hence, \textbf{if it is probable that unseen data points lie in the span of the training data, the bias will be low, otherwise not}. 
 
-Whether that is true depends highly on the data-distribution. If the span of all datapoints $x \in \R^p$ are 'completely' random (e.g. if they are Gaussian distributed), unseen data is usually not in the span of the training data: unless we have draw $n=p$ points, the ridge regression estimate will be biased. If we however all (training and test) data points $x$ lie in a (n unknown) $d$-dimensional subspace, and the vectors are reasonably distributed in there, already around $n=d$ training vectors will be enough to capture the span of all $x$.
+Whether that is true depends highly on the data-distribution. If the span of all datapoints $x \in \R^p$ are 'completely' random (e.g. if they are Gaussian distributed), unseen data is usually not in the span of the training data: unless we  draw $n\geq p$ points, the ridge regression estimate will be biased. If we however all (training and test) data points $x$ lie in a (n unknown) $d$-dimensional subspace, and the vectors are reasonably distributed in there, already around $n=d$ training vectors will be enough to capture the span of all $x$.
 
-As for the \textbf{variance}, one should remember that in realistic scenarios, the labels typically contains some random noise. This noise also needs to be fitted in the constraint $X\beta=Y$, which will induce some variance also in the coefficient vectors $\beta$. How big this variance is depends on the singular values of the matrix $X$, but it is typically non-zero. It is therefore likely that the optimal bias-variance tradeoff happens somewhere else than at $\lambda=0$. This optimal point should be sought for with the validation method discussed above -- for instance via cross-validation. 
+As for the \textbf{variance}, one should remember that in realistic scenarios, the labels typically contains some random noise. This noise also needs to be fitted in the constraint $X\beta=Y$, which will induce some variance also in the coefficient vectors $\beta$. How big this variance is depends on the smallest singular value of the matrix $X$, but it is typically non-zero. In particular, if $X$ has a small lowest singular value, the noise will be 'blown up', and we will get a high variance.  It is therefore likely that the optimal bias-variance tradeoff happens somewhere else than at $\lambda=0$. This optimal point should be sought for with the validation method discussed above -- for instance via cross-validation. 
 
 A few more practical considerations.
 \begin{itemize}
     \item Note that the scaling of the features will have an impact on ridge regression estimates. This is different than standard linear regression -- there, a scaling of a feature can easily be mitigated by scaling of the corresponding coefficient. In ridge regression, the rescaled coefficients will have a different error! It is therefore wise to scale the features so that they are all centered and have variance one.
-    \item One should be very careful \text{ when interpreting} the ridge regression estimate  $\beta$. One cannot do it in the same way as in low-dimensional linear regression. In particular, we have seen that even in the low bias setting of $\lambda\to 0^+$, the returned coefficient vector is not the ground truth $\beta_*$, but rather a projection of it to the span of the training data. This may, as we have seen, still yield good test risks, but may be a completely different vector! One should hence be careful drawing conclusions about which features are important, for instance, from looking at $\beta_\lambda$.
+    \item One should be very careful \text{ when interpreting} the ridge regression estimate  $\beta$. One cannot do it in the same way as in low-dimensional linear regression. In particular, we have seen that even in the low bias setting of $\lambda\to 0^+$, the returned coefficient vector is not the ground truth $\beta_*$, but rather a projection of it to the span of the training data. This may, as we have seen, still yield good test risks, but may be a completely different vector! Drawing conclusions about which features are important, for instance, from looking at $\beta_\lambda$ is hence very dangerous.
 \end{itemize}
 
 \subsection{Feature selection}
-As we have seen, the fundamental problem of linear regression in high dimension is that there are two many features that can be fitted. In many settings, there is a reason to believe that there exists a \emph{subset of the features} which are enough to explain the output variable, and that the rest of the simply distractors. To find such a subset would also help interpretation -- if we for instance can find a few genes in a genomic dataset that in themselves predict a certain diagnosis, that could help us better understand the illness.
+As we have seen, the fundamental problem of linear regression in high dimension is that there are too many features: $n>p$. In many settings, there is a reason to believe that there exists a \emph{subset of the features} which are enough to explain the output variable, and that the rest of them are \emph{distractors}. To find such a subset would also help interpretation -- if we for instance can find a few genes in a genomic dataset that in themselves predict a certain diagnosis, that could help us better understand the illness.
 
-If a sparse solution exists, knowing its support is a very powerful regularizer to perform regression. If we would know a priori which features are important, we could simply perform a linear regression from those features. If $s$ features are 'active', we then only need to estimate $s$ coefficients in $\beta.$
+We can hence hypothesis that there exists a solution $\beta$ with \emph{many entries zero} -- a \emph{sparse} solution. If a sparse solution exists, knowing its support is a very powerful regularizer to perform regression. If we would know a priori which features are important, we could simply perform a linear regression from those features. If $s$ features are 'active', we then only need to estimate $s$ coefficients in $\beta$, and we would 'escape' the problems of high-dimensional regression.
 This strategy is hence a form of \textbf{dimension reduction}.
 
 Now, how does one find which features which are important? The most straightforward way of finding a sparse explanatory variable is to simply go through all subsets of features, perform linear regression, evaluate the estimates, and select the best one, using a carefully chosen metric. The naive approach of simply going through all subsets will require us, if $p$ features are available, to perform $2^p$ linear regressions. Already for $p\approx 20$, that amounts to more than a million problems! 
@@ -833,7 +845,7 @@ To actually classify examples, we output a $1$ if the probability $p_1(x)$ is bi
 \end{align*}
 Note that we here divide the value of $e^{\beta_k,x}$ with the sum of all $e^{\sprod{\beta_\ell,x}}$. This means that the sum of all $p_{k,\beta}(x)$ is equal to $1$, and we can interpret $(p_{k,\beta}(x))_{k\in[K]}$ as a probability distribution.
 
-One speaks of the \emph{softmax}-coding -- the vector ($\sprod{\beta_k,x})_{k\in [K]}$ (which is linear in $x$ is put through the \emph{softmax} function
+One speaks of the \emph{softmax}-coding -- the vector ($\sprod{\beta_k,x})_{k\in [K]}$ (which is linear in $x$) is put through the \emph{softmax} function
 \begin{align*}
     \mathrm{softmax}(y)_i = \frac{e^{y_i}}{\sum_{k \in [K]}e^{y_k}}.
 \end{align*}
@@ -855,9 +867,9 @@ or also minimizing the negative log-likelihood:
 It is not hard to see that an example is assigned to the $k$ for which $\sprod{\beta_k,x}$ is largest. The \emph{decision boundaries}, i.e. sets where more than one class is equally likely, are thus linear subspaces $\sprod{\beta_k,x}=\sprod{\beta_\ell,x}$.
 
 \subsection{Outlook: Generalized Linear Models}
-Logistic regression, as is standard linear regression, is a special case of a so-called \emph{generalized linear models}. The basic assumption of a generalized linear model is that given the value of $x$, the label $y$ follows a one-parameter distribution where the parameter depends on a linear feature $\sprod{\beta,x}$ in  a certain way. This distribution is then fitted to the data at hand, for instance through maximum likelihood.
+Logistic regression, as is standard linear regression, is a special case of a so-called \emph{generalized linear models}. The basic assumption of a generalized linear model is that given the value of $x$, the label $y$ follows a one-parameter distribution where the parameter depends on a linear feature $\sprod{\beta,x}$ in  a certain way. This distribution is then fitted to the data at hand through maximum likelihood.
 
-If the family of distributions is most assumed to be a so-called \emph{exponential family}, we can do more elegant mathematics. For a continuous variable, that is a family of variables with probability distribution functions of the form\footnote{One can also allow a probability measure of the form $h(y) \exp(\sprod{\theta,T(y)} - A(\theta)) $ f or a function $T$ -- one then simply needs to transform the data $z_i=T(y_i)$ to return to the formulation discussed here}
+If the family of distributions is assumed to be a so-called \emph{exponential family}, we can do more elegant mathematics. For a continuous variable, that is a family of variables with probability distribution functions of the form\footnote{One can also allow a probability measure of the form $h(y) \exp(\sprod{\theta,T(y)} - A(\theta)) $ f or a function $T$ -- one then simply needs to transform the data $z_i=T(y_i)$ to return to the formulation discussed here}
 \begin{align*}
     p(y \, \vert \theta ) = h(y) \exp(\sprod{\theta,y} - A(\theta))
 \end{align*}
@@ -871,7 +883,7 @@ $\theta$ is parametrizing the family. In a generalized linear model, we assume t
 \end{align}
 If we assume that $A$ is convex, this is a convex minimization problem, that hence can be solved with standard methods.
 
-It is more common to express the generalized linear model through a so called \emph{link function}. One can show (see the exercises) the following relation for the expected value:
+It is more common to express the generalized linear model through a so called \emph{link function}. One can show (see the exercises) the following relation for the expected value of an exponential distribution:
 \begin{align}
      \erw(y \, \vert \theta) = A'(\theta). \label{eq:mean}
 \end{align}
@@ -885,7 +897,7 @@ To make this a bit more clear, let us consider three examples:
 
 \paragraph{Linear regression} Assuming that $y$ conditioned on $\theta$ is a Gaussian (with a fixed variance $\sigma$) is contained in the above framework:
 \begin{align*}
-    p(y \, \vert \, \theta) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y-\mu)^2}{2\sigma^2}\right) = \frac{e^{-\tfrac{y^2}{2\sigma^2}}}{\sqrt{2\pi\sigma^2}}\exp (\theta y - \tfrac{\sigma^2}{2}\theta^2) \\ \quad \theta = \frac{\mu}{\sigma^2}
+    p(y \, \vert \, \theta) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y-\mu)^2}{2\sigma^2}\right) = \frac{e^{-\tfrac{y^2}{2\sigma^2}}}{\sqrt{2\pi\sigma^2}}\exp (\theta y - \tfrac{\sigma^2}{2}\theta^2), \quad \theta = \frac{\mu}{\sigma^2}
 \end{align*}
 Here, the link function is $g(\mu) =\frac{\mu}{\sigma^2}$. Modelling $\theta = \sprod{\beta,x}$, we quickly obtain that the negative log-likelihood is seen to be equal to (up to a constant)
 \begin{align*}
