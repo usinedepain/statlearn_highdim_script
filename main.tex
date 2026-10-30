@@ -269,7 +269,7 @@ This theorem has fundamental consequences:
     \item First, we see that $\mathrm{Var}(\epsilon)$ is a fundamental lower bound on the risk. If the errors in our model $y=f(x)+\epsilon$ are large, there is no chance for us to learn the model -- this is natural.
     \item In order for a model to perform well, we need it to have low bias \emph{and} low variance. It may in particular be better to have a model with a bit higher bias if it leads to a lot smaller variance, and vice versa. 
 \end{itemize}
-What does it mean for a model to have \emph{low bias}? It means that when smoothing out variations due to different training sets, it is accurate. Put differently, we can think of it as the \texbf{modelling error}. As an example, when trying to fit a highly non-linear $f$ with a linear map, it will never be perfect, and therefore have a high bias. 
+What does it mean for a model to have \emph{low bias}? It means that when smoothing out variations due to different training sets, it is accurate. Put differently, we can think of it as the \textbf{modelling error}. As an example, when trying to fit a highly non-linear $f$ with a linear map, it will never be perfect, and therefore have a high bias. 
 
 What does it mean to have a \emph{low variance}? It means that the training of the model is \textbf{insensitive to the drawing of the training data $D$} -- if the variance is small, we will get more or less the same $f_D$ no matter exactly which $D$ is drawn. This intuitively is good, since we then need to worry less about being 'unlucky' when drawing the sample.
 
