@@ -1082,7 +1082,7 @@ Let us take a step back, and have a look at logistic regression and linear discr
 'best' subspace indirectly - we try to fit distributions to our data. Why don't we instead use a more direct, geometrical criterion to choose it?
 
 
-Deciding on a linear classifier is the same thing as determining a hyperplane $\gamma + \sprod{\alpha,x}$  To simplify the notation, let us as usual attach a $1$ to each $x$, $x\to [1,x]$ and write $\gamma + \sprod{\alpha,x} = \sprod{[\gamma,\alpha},[1,x]=\sprod{\beta,x}$. In order for the hyperplane to be a  decision boundary consistent with the training data, we need all datapoints in one class is one one side of it, i.e. $\sprod{\beta,x}<0$ and the other ones on the other side, $\sprod{\beta,x_i}>0$. If we call the classes $y=1$ and $y=-1$, and let $y=1$ correspond to the side of the hyperplane $\sprod{\beta,x}>0$, a hyperplane is then consistent with the training data if and only if
+Deciding on a linear classifier is the same thing as determining a hyperplane $\gamma + \sprod{\alpha,x}$.  To simplify the notation, let us as usual attach a $1$ to each $x$, $x\to [x,1]$ and write $\gamma + \sprod{\alpha,x} = \sprod{[\alpha,\gamma],[x,1]}=\sprod{\beta,x}$. In order for the hyperplane to be a  decision boundary consistent with the training data, we need all datapoints in one class is one one side of it, i.e. $\sprod{\beta,x}<0$ and the other ones on the other side, $\sprod{\beta,x_i}>0$. If we call the classes $y=1$ and $y=-1$, and let $y=1$ correspond to the side of the hyperplane $\sprod{\beta,x}>0$, a hyperplane is then consistent with the training data if and only if
 \begin{align*}
     y_i \sprod{\beta,x_i}>0, \quad i \in [n].
 \end{align*}
@@ -1103,7 +1103,7 @@ Note that provided $y_i \in \{-1,1\}$ and $y_i\sprod{\beta,x_i}>0$, $y_i\sprod{\
 This problem is scale-invariant in $\beta$ -- multiplying $\beta$ with a positive scalar does not change the value of the function that we are optimizing. We hence need to normalize it to make it have a unique solution. We could only consider $\beta$ with $\norm{\beta}_2=1$, but it is actually more clever to only consider $\beta$ with $\min_{i \in [n]} y_i \sprod{\beta,x_i}\geq 1$. Then, the problem gets the form
 \begin{align}
     & \max_\beta \frac{1}{\norm{\beta}_2}\text{ s.t. } y_i\sprod{\beta,x_i}>1, i \in [n] \nonumber \\
-     =& \min_\beta \tfrac{1}{2}\norm{\beta}_2^2 \text{ s.t } y_i\sprod{\beta,x_i}\geq 1, i \in [n] \label{eq:SVM}
+     \Longleftrightarrow \ & \min_\beta \tfrac{1}{2}\norm{\beta}_2^2 \text{ s.t } y_i\sprod{\beta,x_i}\geq 1, i \in [n] \label{eq:SVM}
 \end{align}
 The last problem is the standard form of the \emph{maximal margin linear support vector machine} (or maximal margine linear SVM, or maximal margin support vector classifier). This form is slightly different compared to the one in \cite{james2023introduction} -- the reason we consider this form is that it is easier to analyse mathematically.
 
@@ -1118,7 +1118,7 @@ This is the default problem that is solved by \texttt{sklearn}! The \texttt{C}-p
 The other strategy is to train a binary classifier for each pair of classes (\emph{'one vs one'}). We then assign an example via counting how many 'votes' each class gets in the pair-wise comparison, and choose the class with the most votes. Using a one-vs-one strategy is sometimes more expensive, but not always -- we will need to fit $\sim K^2$ models instead of $\sim K$, but each fit will on the other hand work with less data. Which strategy to prefer is hence situation dependent.
 
 \subsection{Support vectors}
-Why are these classifiers called \emph{support vector machines}? At the optimum $\beta^*$ of \eqref{eq:SVM}, there must be a number of data vectors $x_i, i\in I$ which are on the decision boundary, i.e  $y_i\sprod{\beta_*,x_i}=1$. These vectors are called the \emph{support vectors}. See also Figure \ref{fig:svm}. These completely decide the decision boundary in the sense that if we, after obtaining a $\beta_*$, change the data-points $x_i$ with $y_i \sprod{\beta_*,x_i}>1$ in a way so that they still obey $y_i \sprod{\beta_*,x_i}>1$, $\beta_*$ will remain the solution of the problem. In this way, the SVM estimate is stable towards outliers far away from the decision boundary.
+Why are these classifiers called \emph{support vector machines}? At the optimum $\beta^*$ of \eqref{eq:SVM}, there must be a number of data vectors $x_i, i\in I$ which are \emph{closest} to the decision boundary, for which  $y_i\sprod{\beta_*,x_i}=1$. These vectors are called the \emph{support vectors}. See also Figure \ref{fig:svm}. These completely decide the decision boundary in the sense that if we, after obtaining a $\beta_*$, change the data-points $x_i$ with $y_i \sprod{\beta_*,x_i}>1$ in a way so that they still obey $y_i \sprod{\beta_*,x_i}>1$, $\beta_*$ will remain the solution of the problem. In this way, the SVM estimate is stable towards outliers far away from the decision boundary.
 
 \begin{figure}
     \centering
@@ -1133,7 +1133,7 @@ Let us define the  \emph{Lagrangian} function for the problem \eqref{eq:SVM}
 \begin{align*}
     L(\beta, \gamma) = \tfrac{1}{2}\norm{\beta}_2^2 + \sum_{i\in [n]}(1-y_i\sprod{\beta,x_i})\gamma_i, \quad \beta \in \R^p, \R^n \ni \gamma \geq 0.
 \end{align*}
-If we have $y_i\sprod{\beta,x_i}\geq 1$ for all $i$, we actually have $\sup_{\gamma \in \R^n} \sum_{i\in [n]}(1-y_i\sprod{\beta,x_i})\gamma_i =0$, and otherwize, the supremum is $+\infty$. Hence, what we are solving in \eqref{eq:SVM} is actually
+If we have $y_i\sprod{\beta,x_i}\geq 1$ for all $i$, we actually have $\sup_{\gamma \geq 0} \sum_{i\in [n]}(1-y_i\sprod{\beta,x_i})\gamma_i =0$, and otherwise, the supremum is $+\infty$. Hence, what we are solving in \eqref{eq:SVM} is actually
 \begin{align*}
     \min_{\beta}\sup_{\gamma\geq 0} L(\beta,\gamma).
 \end{align*}
@@ -1204,7 +1204,7 @@ We know that in the case of strong duality, the optimal values of the primal and
     \begin{align*}
         f(\beta^*) = \sup_{\gamma\geq 0} L(\beta^*,\gamma).
     \end{align*}
-    Now, by the optimality of $\beta^*$, $\gamma_*$ and strong optimality, we get
+    Now, by the optimality of $\beta^*$, $\gamma_*$ and strong duality, we get
     \begin{align*}
          L(\beta^*,\gamma^*) \leq \sup_{\gamma\geq 0} L(\beta^*,\gamma) = \min_{\beta} \sup_{\gamma \geq 0}L(\beta,\gamma) =  \sup_{\gamma \geq 0} \min_{\beta}L(\beta,\gamma) = \min_{\beta} L(\beta,\gamma^*) \leq L(\beta^*,\gamma^*)
     \end{align*}
@@ -1228,11 +1228,12 @@ Hence, $\beta^*$ has an optimal value no worse than the optimal one for the prim
 \end{align*}
 \end{proof}
 
-We have in fact already analysed what $L(\beta^*,\gamma^*) = \inf_{\beta} L(\beta,\gamma^*) = \sup_\gamma L(\beta^*,\gamma)$ means. The first equation means that $\beta$ is the minimizer of $L(\beta,\gamma^*)$, which is the case when
+We have in fact already analysed what $L(\beta^*,\gamma^*) = \inf_{\beta} L(\beta,\gamma^*) = \sup_\gamma L(\beta^*,\gamma)$ means. The first equation $L(\beta^*,\gamma^*) = \inf_{\beta} L(\beta,\gamma^*)$, i.e. that $\beta$ is the minimizer of the quadratic function $L(\beta,\gamma^*)$, which is the case exactly when
+means that
 \begin{align*}
-     \beta^* &= \sum_{i \in [n]} \gamma_i^* y_i x_i
+     \beta^* &= \sum_{i \in [n]} \gamma_i^* y_i x_i.
 \end{align*}
-The second one means that $1-y_i \sprod{\beta^*,x_i} \leq 0$ for all $i$ ( i.e. that $\beta^*$ obeys the constraint of the primal problem) , and that $1-y_i \sprod{\beta^*,x_i} = 0$ whenever $\gamma_i^*=0$  This is clear when we look at $L(\beta^*,\gamma)$:
+The second one, i.e that $L(\beta^*,\gamma^*)=\sup_\gamma L(\beta^*,\gamma)$ means that $\gamma$ is a maximizer of $L(\beta^*,\gamma)$. This firstly means that $1-y_i \sprod{\beta^*,x_i} \leq 0$ for all $i$ (i.e. that $\beta^*$ obeys the constraint of the primal problem) , and that $1-y_i \sprod{\beta^*,x_i} = 0$ whenever $\gamma_i^*=0$  This is clear when we look at $L(\beta^*,\gamma)$:
 \begin{align*}
     L(\beta^*, \gamma) = \tfrac{1}{2}\norm{\beta^*}_2^2 + \sum_{i\in [n]}(1-y_i\sprod{\beta^*,x_i})\gamma_i, \quad  \R^n \ni \gamma \geq 0.
 \end{align*}
@@ -1284,7 +1285,7 @@ The optimality conditions now read
     \gamma_i^*(1-\epsilon_i^*-y_i \sprod{\beta^*,x_i})&=0\\
     \epsilon_i^*(\lambda-\gamma_i^*)&= 0.
 \end{align*}
-Notice that the support vectors are now given by the vectors with $1-\epsilon_i^*=y_i \sprod{\beta^*,x_i}$. They can hence be vectors that violate the constraint $y_i \sprod{\beta^*,x_i}\geq 1$! See also figure \ref{fig:svm_soft}
+Notice that the support vectors are now given by the vectors with $1-\epsilon_i^*=y_i \sprod{\beta^*,x_i}$. They can hence be vectors that violate the constraint $y_i \sprod{\beta^*,x_i}\geq 1$! See also Figure \ref{fig:svm_soft}
 
 \begin{figure}
     \centering
@@ -1309,7 +1310,7 @@ This approach has two major drawbacks
     \item It is hard to a priori choose the transformation $\varphi$. For high-dimensional data, it is very unlikely that we can 'see' the correct geometry such as in the example in Figure  \ref{fig:polar}.
     \item $\varphi$ will typically increase the dimension of the data, and therefore also the size of the $\beta$, which makes the computational burden a lot higher.
 \end{itemize}
-Fortunately, there is a very elegant trick that implicitly incerts a non-linearity $\varphi$ -- the so-called \emph{kernel trick}. To understand it, let us have a look at the dual problem when feeding it with $\varphi(x_i)$ instead of $x_i$.
+Fortunately, there is a very elegant trick that implicitly inserts a non-linearity $\varphi$ -- the so-called \emph{kernel trick}. To understand it, let us have a look at the dual problem when feeding it with $\varphi(x_i)$ instead of $x_i$.
 \begin{align*}
         \sup_{\gamma \geq 0} \sum_{i \in [n]}\gamma_i -\tfrac{1}{2} \norm{\sum_{i\in [n]}\gamma_i y_i \varphi(x_i)}_2^2 = \sup_{\gamma \geq 0 }  \sum_{i \in [n]}\gamma_i -\tfrac{1}{2} \sum_{i,j\in [n]}\gamma_i\gamma_j y_iy_j \sprod{\varphi(x_i),\varphi(x_j)}
     \end{align*}
