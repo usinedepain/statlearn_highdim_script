@@ -1218,13 +1218,13 @@ We know that in the case of strong duality, the optimal values of the primal and
     \begin{align*}
         f(\beta^*) = L(\beta^*,\gamma^*).
     \end{align*}
-    Now, due to strong duality,
+    Now, due to strong duality and the fact that $\beta \in \argmin\beta L(\beta,\gamma^*)$
     \begin{align*}
-        L(\beta^*,\gamma^*) = \sup_\gamma L(\beta^*,\gamma)\leq \sup_\gamma \inf_\beta L(\beta,\gamma) = \inf_\beta \sup_\gamma L(\beta,\gamma)
+        L(\beta^*,\gamma^*) =  \inf_{\beta} L(\beta,\gamma^*)\leq \inf_\beta \sup_{\gamma\geq 0} L(\beta^*,\gamma)=  \inf_\beta \sup_\gamma L(\beta,\gamma)
     \end{align*}
 Hence, $\beta^*$ has an optimal value no worse than the optimal one for the primal problem, which means that it is optimal. To show the optimality of $\gamma^*$, we argue similarly:
 \begin{align*}
-    \inf_\beta L(\beta,\gamma^*) = L(\beta^*,\gamma^*) \geq \sup_{\gamma\geq 0} L(\beta^*,\gamma) \geq \inf_{\beta} \sup_{\gamma\geq 0} L(\beta,\gamma) = \sup_{\gamma \geq 0}\inf_{\beta\geq 0} L(\beta,\gamma).
+     L(\beta^*,\gamma^*)  = \sup_{\gamma\geq 0} L(\beta^*,\gamma) \geq \sup_{\gamma\geq 0} \inf_{\beta} L(\beta,\gamma).
 \end{align*}
 \end{proof}
 
