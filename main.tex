@@ -77,6 +77,7 @@
 \newcommand{\calW}{\mathcal{W}}
 \newcommand{\calS}{\mathcal{S}}
 \newcommand{\calU}{\mathcal{U}}
+\newcommand{\calV}{\mathcal{V}}
 \newcommand{\calN}{\mathcal{N}}
 
 \newcommand{\K}{\mathbb{K}}
@@ -1394,6 +1395,16 @@ Let us prove that a theorem that lets us construct a lot of kernels, and in part
         (\lambda \cdot \kappa)_{i,j} = \sprod{C^i,C^j},
     \end{align*}
     i.e. $\lambda \cdot \kappa = C^*C$, i.e. that $\lambda \cdot \kappa$ is positive semidefinite.
+
+    \underline{Alternative route:} An alternative route, that lets mathematical theory do the heavy lifting, as follows: Since $K$ and $L$ are positive definite, there exists Hilbert spaces $\calH$ and $\calV$ and maps $\varphi:X\to \calH$ and $\psi:X\to \calV$ with $K(x,y)=\sprod{\varphi(x),\varphi(y)}$ and $L(x,y) = \sprod{\psi(x),\psi(y)}$. Now consider the following map:
+    \begin{align*}
+        \chi: X \to \calH \otimes \calV, x \mapsto \varphi(x)\otimes \psi(y).
+    \end{align*}
+    Here, $\calH \otimes \calV$ is the \emph{tensor product} of the spaces $\calH$ and $\calV$, equipped with its canonical scalar product: $\sprod{h\otimes v,\overline{h}\otimes\overline{v}}=\sprod{h,\overline{h}}\sprod{v,\overline{v}}$\footnote{The 'heavy lifting' is making sure that this definition makes sense and defines a scalar product!}. But we then have
+    \begin{align*}
+        K(x,y)L(x,y) = \sprod{\varphi(x),\varphi(y)}\sprod{\psi(x),\psi(y)} = \sprod{\varphi(x)\otimes \psi(x),\varphi(y)\otimes \psi(y)} = \sprod{\chi(x),\chi(y)},
+    \end{align*}
+    so $KL$ must be positive definite.
 \end{proof}
 We can now argue that $(1+\gamma\sprod{x,y})$ is a kernel function as a positive linear combination of two kernel functions, and then $(1+\gamma\sprod{x,y})^d$ as a product of kernel functions. As for $\exp(-\gamma \norm{x-y}_2^2)$, we have
 \begin{align*}
@@ -1422,6 +1433,7 @@ is a limit of positive linear combinations of kernel functions, i.e., a kernel f
 \subsection{Further reading and recommended exercises}
 
 Support vector machines are treated in Chapter 9 of An Introduction to Statistical Learning. For those who want more information about the theory of convex optimization, we recommend the excellent book \cite{boyd2004convex}. The concept of duality in convex optimization is in particular discussed in Chapter 5 of the latter.
+
 
 Recommended exercises in An Introduction to Statistical Learning are 9.7.2 and 9.7.3. Consider also the following exercises.
 
