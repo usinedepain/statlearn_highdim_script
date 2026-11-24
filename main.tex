@@ -1726,7 +1726,7 @@ Let us end this section by summarizing AdaBoost in \eqref{alg:adaboost}. Note th
             \end{align*}
             \STATE Update the classifier
             \begin{align*}
-                f^m = f^{m-1}+\alpha_m f^m
+                f^m = f^{m-1}+\alpha_m f_m^{\mathrm{weak}}
             \end{align*}
             \STATE Update the weights
             \begin{align*}
@@ -2116,7 +2116,7 @@ We can understand dropout in two ways.
 \begin{figure}
     \centering
     \includegraphics[width=0.65\linewidth]{graphics/augmentation.png}
-    \caption{An image from the CIFAR10 dataset (top left), and the result of applying a few data augmentations on it (rotation, cropping, bluring, erazing and color jittering).}
+    \caption{An image from the CIFAR10 dataset (top left), and the result of applying a few data augmentations on it (rotation, cropping, bluring, erasing and color jittering).}
     \label{fig:augment}
 \end{figure}
 
@@ -2289,10 +2289,7 @@ In Chapter $2$, we discussed a very simple \emph{greedy} method to solve the spa
 This method works, but it is relatively expensive -- to find an $s$-sparse vector, we will during its course have to solve $p+(p-1)+\dots + (p-s+1) \sim ps$ linear regression problems. This can be improved a lot. We will here discuss a method that only requires $s$ linear regression problems to be solved: \emph{Orthogonal Matching Pursuit} (OMP). It is needless to say that only needing to solve $s$ problems instead of $ps$ is a \emph{huge} improvement in the high-dimensional regime.
 
 
-OMP is presented in Algorithm \ref{alg:OMP}. Just as forward selection, method iteratively builds estimates $S_0,S_1,S_2, \dots S_k$ of $\mathrm{supp}(\beta_*)$ and approximations $\beta_k$ of $\beta_*$ (where $\mathrm{supp} \beta_k = S_k$. After initializing $S_0=\emptyset$, the idea is to add to $S_k$ the index  $\ell$ that \textbf{maximizes the correlation} between the \textbf{residual} $r_k=Y-X\beta_k$ ('the portion of output left to explain') and \textbf{feature} $\ell$. Assuming the features are all centered and normalized, this can be expressed mathematically as maximizing the scalar product $\abs{\sprod{r_k,X^\ell}}$, where $X^\ell$ is the $\ell$:th column of the data matrix $X$. Note that checking for which $\ell$ the scalar product is largest is very cheap!
-
-One thereafter determines $\beta_{k+1}$ by solving the linear regression problem on the support approximand $S_{k+1}$. It is clear that if we perform $s$ iterations of $OMP$, only $s$ linear regressions need to be solved, which is \emph{much} less than $s\cdot p$, especially in high dimensions ($p\gg 1$). For pseudo-code, see \ref{alg:OMP}.
-
+OMP is presented in Algorithm \ref{alg:OMP}. Just as forward selection, method iteratively builds estimates $S_0,S_1,S_2, \dots S_k$ of $\mathrm{supp }(\beta_*)$ and approximations $\beta_k$ of $\beta_*$ (where $\mathrm{supp} \beta_k = S_k$. After initializing $S_0=\emptyset$, the idea is to add to $S_k$ the index  $\ell$ that \textbf{maximizes the correlation} between the \textbf{residual} $r_k=Y-X\beta_k$ ('the portion of output left to explain') and \textbf{feature} $\ell$. Assuming the features are all centered and normalized, this can be expressed mathematically as maximizing the scalar product $\abs{\sprod{r_k,X^\ell}}$, where $X^\ell$ is the $\ell$:th column of the data matrix $X$. Note that checking for which $\ell$ the scalar product is largest is very cheap! One thereafter determines $\beta_{k+1}$ by solving the linear regression problem on the support approximand $S_{k+1}$. In this manner, we only need to solve one regression problem per iteration, and as we will see, we will only need $s$ iterations to find the correct support. 
 
 \begin{algorithm}[tb]      
 	\caption{(OMP)} 
@@ -2325,7 +2322,9 @@ The answer is that we can. The most fundamental and well-known recovery guarante
     \end{align*}
     Also assume that there exists an $s$-sparse vector $\beta_*$ that explains the output, i.e. so that $Y=X\beta_*$. Then, if $$\mu < \frac{1}{2s-1},$$ OMP will output $\beta_*$ after $s$ steps. 
 \end{theorem}
-\paragraph{Intuition:} Remember that we add variables by checking which feature correlates highly with the residual. If all features are (empirically) weakly correlated, a feature not present in $\mathrm{supp}(\beta_*)$ will not be correlated to $r_0=Y$, and hence not chosen. When we calculate $\beta_1$, we then 'remove' the portion of $Y$ that can be explained by the feature $i_1$, and what is left $r_1$ should then be explainable with the remaning variables. The features not present in $\mathrm{supp}(\beta_*)$ will again give a small correlation value, and we again choose a correct variable, and so on and so forth. In each of the $s$ first steps, we hence pick a new feature, and this feature is one that is present in the ground truth support, so we will be done after $s$ steps.
+\paragraph{Intuition:} Remember that we add variables by checking which feature correlates highly with the residual. If all features are (empirically) weakly correlated, a feature not present in $\mathrm{supp}(\beta_*)$ will not be correlated to $r_0=Y$, and hence not chosen. When we calculate $\beta_1$, we then 'remove' the portion of $Y$ that can be explained by the feature $i_1$, and what is left ($r_1$) should then be explainable with the remaining variables. The features not present in $\mathrm{supp}(\beta_*)$ will again give a small correlation value, and we again choose a correct variable, and so on and so forth. 
+
+Hence, in each of the $s$ first steps, we a new feature, and that feature is one that is present in the ground truth support, so we will be done after $s$ steps.
 
 
 To give a formal proof of Theorem \ref{th:OMP}, we need the following lemma.
@@ -2363,7 +2362,7 @@ Note that we used that $\ell\in S$, per induction assumption. We also used the d
 
 Now let $i \notin S$. Then $\abs{\sprod{X^j,X^i}}\leq \mu$ for all $j\in S$, and we can bound
 \begin{align*}
-       \abs{\sprod{r_k,X^i}} = \abs{\sum_{j \in S}\abs{\gamma_k(j)}\sprod{X^j,X^i}} \geq \abs{\gamma_k(\ell)}\mu s.
+       \abs{\sprod{r_k,X^i}} \leq  \sum_{j \in S}\abs{\gamma_k(j)}\abs{\sprod{X^j,X^i}} \leq \abs{\gamma_k(\ell)}\mu s.
 \end{align*}
 This is smaller than $\abs{\gamma_\ell}(1 - (s-1)\mu)$ due to our assumption. Hence, all $\abs{\sprod{r_k,X^i}}$ is smaller than $\abs{\sprod{r_k,X^\ell}}$, and $i$ cannot be chosen in the support extension step. This proves that also $S_{k+1} \sse S$. Also note that due to induction assumption (iii), an index in $S_k$ cannot be chosen again, and hence, $\abs{S_{k+1}}= \abs{S_k} +1 = k+1$.
 
@@ -2403,8 +2402,8 @@ Such sums obey the central limit theorem. If we assume that
 \end{itemize}
 the central limit theorem implies that for high values of $n$,
 \begin{align*}
-    \frac{1}{\sqrt{n}} \left(\sum_{k \in [n]}\left(x_k(i)x_k(j)\right) \sim \mathcal{N}(0,\mathbb{E}(x(i)^2x(j)^2)\right), i \neq j \\
-    \frac{1}{\sqrt{n}} \left(\sum_{k \in [n]}\left(x_k(i)^2- 1\right) \sim \mathcal{N}(0,\mathbb{E}(x(i)^4)\right),
+    \frac{1}{\sqrt{n}} \sum_{k \in [n]}\left(x_k(i)x_k(j)\right) \sim \mathcal{N}(0,\mathbb{E}(x(i)^2x(j)^2), i \neq j \\
+    \frac{1}{\sqrt{n}} \sum_{k \in [n]}\left(x_k(i)^2- 1 \sim \mathcal{N}(0,\mathbb{E}(x(i)^4)\right),
 \end{align*}
 Assuming that $\mathbb{E}(x(i)^2x(j)^2)\leq K$ for some common $K$, we can thus argue with high probability that
 \begin{align}
@@ -2429,7 +2428,7 @@ See also the exercises below.
 \subsection{A better regularization: LASSO and Basis pursuit}
 We have already to know a different approach to high-dimensional linear regression: \emph{regularization}. More specifically, we defined \emph{ridge regression} -- by penalizing the $\ell_2$-norm, we could reduced the variance of linear regression. We also argued mathematically that it will be able to return a ground truth if the rows of the data matrix $X$, the \emph{measurements}, lie in a low-dimensional subspace, but else not.
 
-Can ridge regression be used for sparse recover?y In principle yes, but it will not work better than for any other ground truth. In particular, if the measurements (rows of $X$) are normally distributed, ridge regression will typically give us back dense (=non-sparse) vectors (because of the geometry of the kernel of random matrices). 
+Can ridge regression be used for sparse recovery? In principle yes, but it will not work better than for any other ground truth. In particular, if the measurements (rows of $X$) are normally distributed, ridge regression will typically give us back dense (=non-sparse) vectors (because of the geometry of the kernel of random matrices). 
 
 \begin{figure}
     \centering
@@ -2438,7 +2437,7 @@ Can ridge regression be used for sparse recover?y In principle yes, but it will 
     \label{fig:l1sol}
 \end{figure}
 
-At first glance somewhat surprisingly, we can however regularize for sparsity by simply changing the regularization norm! This is the idea of the \emph{LASSO} (least absolute shrinkage and selection operator), which amounts to regularizing a linear regression with an $\ell_1$-term:
+At first glance somewhat surprisingly, we can however regularize for sparsity by simply changing the regularization norm! This is the idea of the \emph{LASSO} (Least Absolute Shrinkage and Selection Operator), which amounts to regularizing a linear regression with an $\ell_1$-term:
 \begin{align} \label{eq:lasso}
     \min_{\beta} \norm{X\beta-y}_2^2 + \lambda \norm{\beta}_1
 \end{align}
@@ -2465,7 +2464,7 @@ To arrive at the LASSO, we impose an \emph{exponential prior} on $\beta$, and as
     &\beta_i \text{ i.i.d exponential, i.e. } \mathbb{P}(\beta = b) = \Pi_{i\in [p]}e^{-\mu\abs{b_i}} \\
     &\mathbb{P}(Y=y\, \vert \, \beta=b) \sim \exp(-\norm{Xb-y}^2_2/2\sigma^2).
 \end{align}
-Note that the exponential distribution has heavier tails than the Gaussian one. Hence, it is more probable that a few entries of $\beta$ are bigger than the others, which is an approximation of sparsity. One could make other assumptions more closely modeling sparsity, but this would lead to optimization problems which are hard to solve. See the exercises for more information on this!
+Note that the exponential distribution has \emph{heavier tails} than the Gaussian one. Hence, it is more probable that a few entries of $\beta$ are bigger than the others, which is an approximation of sparsity. One could make other assumptions more closely modeling sparsity, but this would lead to optimization problems which are hard to solve. See the exercises for more information on this!
 
 We then use the Bayes theorem to arrive at $\mathbb{P}(\beta \, \vert \, Y)$:
 \begin{align*}
@@ -2496,7 +2495,7 @@ which is just another way of writing the LASSO problem.
     The only thing left to give a general proof is to show that in any case, all solutions of \eqref{eq:lasso} have the same $\ell_1$-norm. This is possible, but it requires quite involved tools from the theory of convex optimization - we skip this.
 \end{proof}
 
-\paragraph{Remark} The lemma shows that we can solve \eqref{eq:constr} instead of the LASSO and obtain the same solutions. If our favorite algorithm works better for one of them, we should hence use that  As the proof shows, there is however no way to a priori tell which $s$ corresponds to which $\lambda$. Since in the end both $\lambda$ and $s$ needs to be tuned, this poses little problems from both the theoretical and practical view.
+\paragraph{Remark} The lemma shows that we can solve \eqref{eq:constr} instead of the LASSO and obtain the same solutions. If our favorite algorithm works better for any one of them, we should hence use that.  As the proof shows, there is however no way to a priori tell which $s$ corresponds to which $\lambda$. Since in the end both $\lambda$ and $s$ needs to be tuned, this poses little problems from both the theoretical and practical view.
 
 \smallskip 
 The main importance of the  lemma is that we might as well reason about the solutions of \eqref{eq:constr}. And here, we can use geometrical intuition! Let us draw a sketch in two dimensions -- see Figure \ref{fig:l1l2}. Here, we are optimizing over the $\ell_1$-ball, and the function that we are optimizing have level sets that are lines. Those lines will almost always hit the $\ell_1$-ball in one of the vertices. The vertices are exactly the sparse vectors! Compare this to the $\ell_2$-constrained linear regression - the pendant for ridge regression -- here, the lines can hit the circle anywhere.
@@ -2510,7 +2509,7 @@ The main importance of the  lemma is that we might as well reason about the solu
 
 There are ways to formalize this argument and also carry it out in any dimension. In order to understand those argument, we would however first have to take a significant detour into convex geometry and optimization, which would be inappropriate here.
 
-\subsubsection{The low regularization limit: Basis Pursuit} Now let us try to find explainatoin why the LASSO can recover a sparse coeffient vector already from few observations. We will do so in the low-noise, low regularization limit. That is, we will assume that the sparse, linear model is perfect: there exists a sparse $\beta_*$ with $Y= X\beta_*$, and study the limit of LASSO as $\lambda \to 0^+$ (just as we did for ridge regression). Let us begin by making the latter limit more explicit.
+\subsubsection{The low regularization limit: Basis Pursuit} Now let us try to find explanation why the LASSO can recover a sparse coeffient vector already from few observations. We will do so in the low-noise, low regularization limit. That is, we will assume that the sparse, linear model is perfect: there exists a sparse $\beta_*$ with $Y= X\beta_*$, and study the limit of LASSO as $\lambda \to 0^+$ (just as we did for ridge regression). Let us begin by making the latter limit more explicit.
 
 \begin{theorem}
     Let $\beta_\lambda$ denote the solution of \eqref{eq:lasso}. Then
@@ -2533,7 +2532,7 @@ There are ways to formalize this argument and also carry it out in any dimension
     \end{align*}
     Consequently,
     \begin{align*}
-        \lim_{\lambda \to \infty} \norm{\beta_\lambda}_1 \leq \lim_{\lambda \to \infty} \tfrac{1}{2}\frac{\norm{Y}_2^2}{\lambda} = 0,
+        \lim_{\lambda \to \infty} \norm{\beta_\lambda}_1 \leq \lim_{\lambda \to \infty} \frac{\norm{Y}_2^2}{2\lambda} = 0,
     \end{align*}
     which already shows (ii).
  
@@ -2562,7 +2561,7 @@ There are ways to formalize this argument and also carry it out in any dimension
 
 The problem \ref{eq:BP} is called \emph{Basis Pursuit}. Notice the similar relation of the Basis Pursuit to the LASSO as minimal $\ell_2$-norm linear regression to ridge regression.
 
-When does Basis Pursuit recover a $\beta_*$? In the following, we will prove that the following \emph{restricted isometry property} (RIP) is sufficient.
+When does Basis Pursuit recover a sparse $\beta_*$? In the following, we will prove that the following \emph{restricted isometry property} (RIP) is sufficient.
 \begin{defi}
     The largest $\delta>0$ so that
     \begin{align*}
